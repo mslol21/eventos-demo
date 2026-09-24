@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-green-950: #051811;
+  --color-brand-green-900: #0B2F21;
+  --color-brand-green-800: #103D2C;
+  --color-brand-green-700: #17523C;
+  --color-brand-green-600: #1E694D;
+  --color-brand-green-500: #268260;
+  --color-brand-green-100: #DCEEE5;
+  --color-brand-green-50: #EEF7F2;
+
+  --color-brand-orange-600: #C44E0F;
+  --color-brand-orange-500: #E0631B;
+  --color-brand-orange-400: #EA7B3B;
+  --color-brand-orange-100: #FFE6D6;
+  --color-brand-orange-50: #FFF6F0;
+
+  --color-brand-gold-600: #A88339;
+  --color-brand-gold-500: #C5A059;
+  --color-brand-gold-400: #D9B56F;
+  --color-brand-gold-100: #F7EEDB;
+  --color-brand-gold-50: #FBF8F2;
+
+  --color-brand-cream-50: #FAF8F5;
+  --color-brand-cream-100: #F3EFE9;
+  --color-brand-cream-200: #E9E2D7;
+  --color-brand-cream-300: #DACFC1;
+
+  --color-brand-charcoal: #151D19;
+  --color-brand-muted: #5C6762;
+}
+
+:root {
+  --background: #FAF8F5;
+  --foreground: #151D19;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+}
+
+/* Custom smooth transitions & animations */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Safe area insets for mobile floating bar */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}

@@ -1,0 +1,88 @@
+import { GalleryItem } from '@/types';
+
+export const GALLERY_DATA: GalleryItem[] = [
+  {
+    id: 'gal-1',
+    title: 'Grelhados Nobres na Brasa',
+    category: 'Churrascos',
+    imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=80',
+    description: 'Picanha fatiada ao ponto em tábua rústica com sal grosso e chimichurri.',
+  },
+  {
+    id: 'gal-2',
+    title: 'Mesa de Finger Foods Gourmet',
+    category: 'Finger Foods',
+    imageUrl: 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1000&q=80',
+    description: 'Canapés elegantes servidos em tábua de ardósia para coquetel de boas-vindas.',
+  },
+  {
+    id: 'gal-3',
+    title: 'Fettuccine com Molho Pomodoro e Basílico',
+    category: 'Massas',
+    imageUrl: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=1000&q=80',
+    description: 'Massa fresca salteada na hora com manjericão e lascas de parmesão Grana.',
+  },
+  {
+    id: 'gal-4',
+    title: 'Ilha de Antepastos e Queijos Selecionados',
+    category: 'Buffets',
+    imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1000&q=80',
+    description: 'Composição de queijos nobres, charcutaria artesanal e frutas frescas da estação.',
+  },
+  {
+    id: 'gal-5',
+    title: 'Montagem de Mesa Posta e Louças Finas',
+    category: 'Montagens',
+    imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80',
+    description: 'Decoração de mesa com porcelanas Oxford, taças de cristal e arranjos florais discretos.',
+  },
+  {
+    id: 'gal-6',
+    title: 'Celebração ao Ar Livre em Espaço Privado',
+    category: 'Eventos',
+    imageUrl: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=1000&q=80',
+    description: 'Atendimento de buffet completo para aniversário de 40 anos com 80 convidados.',
+  },
+  {
+    id: 'gal-7',
+    title: 'Cortes Artesanais de Costela e Linguiça',
+    category: 'Churrascos',
+    imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=80',
+    description: 'Ponto perfeito e suculência garantida com corte nobre na hora.',
+  },
+  {
+    id: 'gal-8',
+    title: 'Mini Porções Quentes Volantes',
+    category: 'Finger Foods',
+    imageUrl: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1000&q=80',
+    description: 'Mini cumbuquinhas de risoto de cogumelos com azeite trufado.',
+  },
+  {
+    id: 'gal-9',
+    title: 'Estação Show Cooking de Massas',
+    category: 'Massas',
+    imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=1000&q=80',
+    description: 'Chef preparando pratos personalizados ao vivo com ingredientes selecionados.',
+  },
+  {
+    id: 'gal-10',
+    title: 'Estrutura Completa de Réchauds e Buffet',
+    category: 'Buffets',
+    imageUrl: 'https://images.unsplash.com/photo-1556761223-4c4282c73f77?auto=format&fit=crop&w=1000&q=80',
+    description: 'Alimentos mantidos sempre aquecidos em réchauds de aço inox escovado.',
+  },
+  {
+    id: 'gal-11',
+    title: 'Organização de Taças e Bar de Drinks',
+    category: 'Montagens',
+    imageUrl: 'https://images.unsplash.com/photo-1576867757603-05b134ebc379?auto=format&fit=crop&w=1000&q=80',
+    description: 'Estação de bar impecavelmente limpa, organizada e pronta para atender o evento.',
+  },
+  {
+    id: 'gal-12',
+    title: 'Casamento Intimista ao Pôr do Sol',
+    category: 'Eventos',
+    imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1000&q=80',
+    description: 'Buffet personalizado com ilha gastronômica em condomínio fechado.',
+  },
+];
