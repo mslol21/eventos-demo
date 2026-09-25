@@ -44,6 +44,15 @@ const GUEST_PRESETS = [
   { label: 'Mais de 100', value: 120 },
 ];
 
+const STEP_LABELS = [
+  'Buffet',
+  'Convidados',
+  'Data & Hora',
+  'Ocasião',
+  'Adicionais',
+  'Contato',
+];
+
 function WizardInner() {
   const searchParams = useSearchParams();
   const initialService = searchParams.get('servico');
@@ -187,7 +196,6 @@ function WizardInner() {
     let generatedQuote: QuoteRequest;
 
     try {
-      // 1. Send to internal API endpoint with server-side price recalculation & rate limiting
       const res = await fetch('/api/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -201,7 +209,6 @@ function WizardInner() {
         throw new Error(json.error || 'Falha ao salvar');
       }
     } catch {
-      // Fallback: create local quote object if offline or network issue
       generatedQuote = {
         id: `ORC-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
         customerName,
@@ -225,13 +232,11 @@ function WizardInner() {
       };
     }
 
-    // 2. Persist in local storage for instant sync with /admin dashboard
     saveLocalQuote(generatedQuote);
     setSubmittedQuote(generatedQuote);
     setIsCompleted(true);
     setIsSubmitting(false);
 
-    // 3. Generate structured WhatsApp Message
     const whatsAppMessage = generateWhatsAppMessage({
       customerName,
       eventType,
@@ -249,7 +254,6 @@ function WizardInner() {
 
     const url = buildWhatsAppUrl(whatsAppMessage, COMPANY_CONFIG.whatsapp);
 
-    // Open WhatsApp in a new tab
     if (typeof window !== 'undefined') {
       window.open(url, '_blank');
     }
@@ -292,28 +296,41 @@ function WizardInner() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
-      {/* Progress Stepper Bar */}
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 pb-28 sm:pb-16">
+      {/* Progress Stepper Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between text-xs sm:text-sm font-semibold text-[#0B2F21] mb-2">
-          <span>
-            {currentStep < 7 ? `Etapa ${currentStep} de 6` : 'Resumo e Envio 🎉'}
-          </span>
-          <span className="text-[#E0631B]">
-            {Math.round((Math.min(currentStep, 6) / 6) * 100)}% concluído
+        <div className="flex items-baseline justify-between gap-2 text-xs sm:text-sm font-semibold text-[#0B2F21] mb-3">
+          <div className="flex items-baseline gap-2 min-w-0">
+            <span className="font-serif font-bold text-sm sm:text-base text-[#0B2F21]">
+              {currentStep < 7 ? `Etapa ${currentStep} de 6:` : 'Resumo da Simulação'}
+            </span>
+            {currentStep <= 6 && (
+              <span className="text-[#5C6762] font-normal text-xs sm:text-sm truncate">
+                {STEP_LABELS[currentStep - 1]}
+              </span>
+            )}
+          </div>
+          <span className="font-mono text-xs sm:text-sm font-bold text-[#E0631B] shrink-0">
+            {formatBRL(pricing.totalEstimatedPrice)}
           </span>
         </div>
-        <div className="w-full h-2.5 bg-[#E9E2D7] rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-[#0B2F21] to-[#E0631B] transition-all duration-300 rounded-full"
-            style={{ width: `${(Math.min(currentStep, 6) / 6) * 100}%` }}
-          />
+
+        {/* Stepper Progress Indicator */}
+        <div className="grid grid-cols-6 gap-1.5 h-1.5 w-full">
+          {STEP_LABELS.map((_, i) => (
+            <div
+              key={i}
+              className={`rounded-full transition-colors duration-300 ${
+                i + 1 <= currentStep ? 'bg-[#E0631B]' : 'bg-[#E9E2D7]'
+              }`}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Error alert if step is invalid */}
+      {/* Error Alert */}
       {errorMsg && (
-        <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-center gap-2.5 animate-in fade-in duration-200">
+        <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-center gap-2.5">
           <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
           <span>{errorMsg}</span>
         </div>
@@ -321,11 +338,11 @@ function WizardInner() {
 
       {/* STEP 1: Buffets */}
       {currentStep === 1 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="text-center sm:text-left">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E0631B]">
-              Etapa 1
-            </span>
+        <div className="space-y-6">
+          <div className="text-left">
+            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
+              Etapa 1 de 6
+            </p>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
               Qual experiência você procura?
             </h1>
@@ -342,10 +359,10 @@ function WizardInner() {
                   type="button"
                   key={service.id}
                   onClick={() => setServiceId(service.id)}
-                  className={`text-left p-5 rounded-2xl border-2 transition-all flex flex-col justify-between group relative overflow-hidden focus:outline-none ${
+                  className={`text-left p-5 rounded-2xl border-2 transition-all duration-200 flex flex-col justify-between group relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] ${
                     isSelected
-                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/20 shadow-md'
-                      : 'border-[#E9E2D7] bg-white hover:border-[#0B2F21]/40 hover:shadow-xs'
+                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 shadow-md scale-[1.01]'
+                      : 'border-[#E9E2D7] bg-white hover:border-[#0B2F21]/30 hover:shadow-xs'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
@@ -354,11 +371,11 @@ function WizardInner() {
                         src={service.heroImage}
                         alt={service.name}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
                           ? 'border-[#E0631B] bg-[#E0631B] text-white'
                           : 'border-gray-300'
@@ -394,11 +411,11 @@ function WizardInner() {
 
       {/* STEP 2: Guests */}
       {currentStep === 2 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="text-center sm:text-left">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E0631B]">
-              Etapa 2
-            </span>
+        <div className="space-y-6">
+          <div className="text-left">
+            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
+              Etapa 2 de 6
+            </p>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
               Quantas pessoas participarão?
             </h1>
@@ -418,10 +435,10 @@ function WizardInner() {
                     setCustomGuestMode(false);
                     setGuestCount(preset.value);
                   }}
-                  className={`p-4 rounded-xl border-2 text-center transition-all focus:outline-none ${
+                  className={`p-4 rounded-xl border-2 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] active:scale-[0.98] ${
                     isSelected
-                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/20 text-[#0B2F21] font-bold shadow-sm'
-                      : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/40'
+                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 text-[#0B2F21] font-bold shadow-xs'
+                      : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/30'
                   }`}
                 >
                   <Users className="w-5 h-5 mx-auto mb-1 text-[#E0631B]" />
@@ -433,10 +450,10 @@ function WizardInner() {
             <button
               type="button"
               onClick={() => setCustomGuestMode(true)}
-              className={`p-4 rounded-xl border-2 text-center transition-all focus:outline-none ${
+              className={`p-4 rounded-xl border-2 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] active:scale-[0.98] ${
                 customGuestMode
-                  ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/20 text-[#0B2F21] font-bold shadow-sm'
-                  : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/40'
+                  ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 text-[#0B2F21] font-bold shadow-xs'
+                  : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/30'
               }`}
             >
               <Plus className="w-5 h-5 mx-auto mb-1 text-[#E0631B]" />
@@ -444,7 +461,7 @@ function WizardInner() {
             </button>
           </div>
 
-          {/* Custom Input or Slider */}
+          {/* Custom Input & Slider */}
           <div className="p-6 rounded-2xl bg-white border border-[#E9E2D7] space-y-4">
             <div className="flex items-center justify-between">
               <label htmlFor="guestInput" className="font-semibold text-sm text-[#0B2F21]">
@@ -489,11 +506,11 @@ function WizardInner() {
 
       {/* STEP 3: Date & Time */}
       {currentStep === 3 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="text-center sm:text-left">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E0631B]">
-              Etapa 3
-            </span>
+        <div className="space-y-6">
+          <div className="text-left">
+            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
+              Etapa 3 de 6
+            </p>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
               Quando será o evento?
             </h1>
@@ -513,7 +530,7 @@ function WizardInner() {
                 type="date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="w-full p-3.5 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
+                className="w-full p-3.5 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-[#0B2F21] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
               />
             </div>
 
@@ -526,7 +543,7 @@ function WizardInner() {
                 id="eventTime"
                 value={eventTime}
                 onChange={(e) => setEventTime(e.target.value)}
-                className="w-full p-3.5 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
+                className="w-full p-3.5 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-[#0B2F21] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
               >
                 <option value="11:30">11h30 (Almoço)</option>
                 <option value="12:00">12h00 (Almoço)</option>
@@ -540,7 +557,6 @@ function WizardInner() {
             </div>
           </div>
 
-          {/* Non-promising availability disclaimer banner */}
           <div className="p-4 rounded-xl bg-[#FFF6F0] border border-[#FFE6D6] flex items-start gap-3">
             <ShieldAlert className="w-5 h-5 text-[#E0631B] shrink-0 mt-0.5" />
             <p className="text-xs sm:text-sm text-[#0B2F21]">
@@ -552,11 +568,11 @@ function WizardInner() {
 
       {/* STEP 4: Event Type */}
       {currentStep === 4 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="text-center sm:text-left">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E0631B]">
-              Etapa 4
-            </span>
+        <div className="space-y-6">
+          <div className="text-left">
+            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
+              Etapa 4 de 6
+            </p>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
               Que tipo de evento será?
             </h1>
@@ -573,10 +589,10 @@ function WizardInner() {
                   type="button"
                   key={item.id}
                   onClick={() => setEventType(item.id)}
-                  className={`p-4 rounded-xl border-2 text-left flex items-center justify-between transition-all focus:outline-none ${
+                  className={`p-4 rounded-xl border-2 text-left flex items-center justify-between transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] active:scale-[0.98] ${
                     isSelected
-                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/20 text-[#0B2F21] font-bold shadow-sm'
-                      : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/40'
+                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 text-[#0B2F21] font-bold shadow-xs'
+                      : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/30'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -597,11 +613,11 @@ function WizardInner() {
 
       {/* STEP 5: Add-ons */}
       {currentStep === 5 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="text-center sm:text-left">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E0631B]">
-              Etapa 5
-            </span>
+        <div className="space-y-6">
+          <div className="text-left">
+            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
+              Etapa 5 de 6
+            </p>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
               Personalize seu evento
             </h1>
@@ -617,15 +633,15 @@ function WizardInner() {
                 <div
                   key={addon.id}
                   onClick={() => toggleAddon(addon.id)}
-                  className={`cursor-pointer p-4 sm:p-5 rounded-2xl border-2 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                  className={`cursor-pointer p-4 sm:p-5 rounded-2xl border-2 transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-4 active:scale-[0.99] ${
                     isSelected
-                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 shadow-sm'
+                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 shadow-xs'
                       : 'border-[#E9E2D7] bg-white hover:border-[#0B2F21]/30'
                   }`}
                 >
                   <div className="flex items-start gap-3.5">
                     <div
-                      className={`w-6 h-6 rounded-md border flex items-center justify-center shrink-0 mt-0.5 ${
+                      className={`w-6 h-6 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                         isSelected
                           ? 'border-[#E0631B] bg-[#E0631B] text-white'
                           : 'border-gray-300 bg-[#FAF8F5]'
@@ -669,11 +685,11 @@ function WizardInner() {
 
       {/* STEP 6: Event & Contact Details */}
       {currentStep === 6 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="text-center sm:text-left">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E0631B]">
-              Etapa 6
-            </span>
+        <div className="space-y-6">
+          <div className="text-left">
+            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
+              Etapa 6 de 6
+            </p>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
               Dados do Evento & Contato
             </h1>
@@ -682,7 +698,7 @@ function WizardInner() {
             </p>
           </div>
 
-          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E9E2D7] shadow-sm space-y-4">
+          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E9E2D7] shadow-xs space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label htmlFor="customerName" className="text-xs font-bold uppercase tracking-wider text-[#0B2F21]">
@@ -778,7 +794,7 @@ function WizardInner() {
               <textarea
                 id="customerNotes"
                 rows={3}
-                placeholder="Ex: Teremos convidados com restrição a lactose; local possui churrasqueira de alvenaria com pia ao lado."
+                placeholder="Ex: Teremos convidados com restrição a lactose; local possui churrasqueira com pia ao lado."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full p-3 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
@@ -790,11 +806,11 @@ function WizardInner() {
 
       {/* STEP 7: RESUMO & CONFIRMAÇÃO */}
       {currentStep === 7 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
+        <div className="space-y-6">
           <div className="text-center">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#E0631B]">
+            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
               Tudo pronto
-            </span>
+            </p>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#0B2F21] mt-1">
               Seu evento está quase pronto 🎉
             </h1>
@@ -804,7 +820,7 @@ function WizardInner() {
           </div>
 
           {/* Master Summary Card */}
-          <div className="bg-white rounded-3xl border border-[#E9E2D7] p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="bg-white rounded-3xl border border-[#E9E2D7] p-6 sm:p-8 shadow-xs space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-[#F3EFE9]">
               <div>
                 <span className="text-xs uppercase tracking-wider text-[#C44E0F] font-bold">
@@ -900,7 +916,6 @@ function WizardInner() {
                 </div>
               </div>
 
-              {/* Strict Requirement Disclaimer */}
               <div className="pt-3 border-t border-[#FFE6D6] text-xs text-[#5C6762] space-y-1">
                 <p className="font-semibold text-[#0B2F21]">
                   Atenção sobre valores:
@@ -917,7 +932,7 @@ function WizardInner() {
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleFinalSubmit}
-                className="w-full flex items-center justify-center gap-3 py-4 sm:py-5 px-6 rounded-2xl text-sm sm:text-base font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-xl hover:shadow-2xl transition-all duration-200 active:scale-98 disabled:opacity-50 cursor-pointer"
+                className="w-full flex items-center justify-center gap-3 py-4 sm:py-5 px-6 rounded-2xl text-sm sm:text-base font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-xl hover:shadow-2xl transition-all duration-200 active:scale-[0.98] disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
                 <MessageCircle className="w-6 h-6" />
                 <span>
@@ -944,9 +959,9 @@ function WizardInner() {
             </div>
           </div>
 
-          {/* Success Dialog & Confirmation if completed */}
+          {/* Success Dialog */}
           {isCompleted && (
-            <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-3 animate-in fade-in">
+            <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-3">
               <div className="flex items-center gap-2 font-bold text-base">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 <span>
@@ -972,13 +987,13 @@ function WizardInner() {
         </div>
       )}
 
-      {/* Navigation Buttons (Back & Next) */}
+      {/* Desktop/Tablet Navigation Buttons (Back & Next) */}
       <div className="mt-8 flex items-center justify-between pt-6 border-t border-[#E9E2D7]">
         {currentStep > 1 && currentStep < 7 ? (
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold border border-[#E9E2D7] bg-white text-[#0B2F21] hover:bg-[#FAF8F5] transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold border border-[#E9E2D7] bg-white text-[#0B2F21] hover:bg-[#FAF8F5] transition-colors active:scale-[0.98]"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Voltar</span>
@@ -987,7 +1002,7 @@ function WizardInner() {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold border border-[#E9E2D7] bg-white text-[#0B2F21] hover:bg-[#FAF8F5] transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold border border-[#E9E2D7] bg-white text-[#0B2F21] hover:bg-[#FAF8F5] transition-colors active:scale-[0.98]"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Editar Informações</span>
@@ -1000,13 +1015,48 @@ function WizardInner() {
           <button
             type="button"
             onClick={handleNext}
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] shadow hover:shadow-md transition-all active:scale-95"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] shadow-sm hover:shadow-md transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B]"
           >
             <span>{currentStep === 6 ? 'Ver Resumo Final' : 'Avançar'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         )}
       </div>
+
+      {/* Sticky Ergonomic Bottom Action Bar for Mobile (360px - 430px) */}
+      {currentStep < 7 && (
+        <div className="sm:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 border-t border-[#E9E2D7] backdrop-blur-md z-30 flex items-center justify-between shadow-lg pb-safe">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-[#5C6762] uppercase tracking-wider font-semibold">
+              Estimativa
+            </span>
+            <span className="font-serif font-bold text-base text-[#0B2F21]">
+              {formatBRL(pricing.totalEstimatedPrice)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {currentStep > 1 && (
+              <button
+                type="button"
+                onClick={handleBack}
+                className="p-2.5 rounded-xl border border-[#E9E2D7] text-[#0B2F21] bg-white active:scale-95"
+                aria-label="Voltar etapa anterior"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleNext}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#E0631B] text-white text-xs uppercase tracking-wider font-bold shadow-sm active:scale-95"
+            >
+              <span>{currentStep === 6 ? 'Resumo' : 'Avançar'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

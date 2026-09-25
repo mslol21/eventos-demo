@@ -1,0 +1,158 @@
+{
+  "timestamp": "2026-09-25T22:30:13.572Z",
+  "pagesChecked": [
+    {
+      "page": "/",
+      "viewport": "mobile",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\home-mobile.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/servicos",
+      "viewport": "mobile",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\servicos-mobile.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/monte-seu-evento",
+      "viewport": "mobile",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\monte-seu-evento-mobile.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/galeria",
+      "viewport": "mobile",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\galeria-mobile.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/sobre",
+      "viewport": "mobile",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\sobre-mobile.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/duvidas",
+      "viewport": "mobile",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\duvidas-mobile.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/contato",
+      "viewport": "mobile",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\contato-mobile.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/admin",
+      "viewport": "mobile",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\admin-mobile.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/",
+      "viewport": "tablet",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\home-tablet.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/servicos",
+      "viewport": "tablet",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\servicos-tablet.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/monte-seu-evento",
+      "viewport": "tablet",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\monte-seu-evento-tablet.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/galeria",
+      "viewport": "tablet",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\galeria-tablet.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/sobre",
+      "viewport": "tablet",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\sobre-tablet.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/duvidas",
+      "viewport": "tablet",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\duvidas-tablet.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/contato",
+      "viewport": "tablet",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\contato-tablet.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/admin",
+      "viewport": "tablet",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\admin-tablet.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/",
+      "viewport": "desktop",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\home-desktop.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/servicos",
+      "viewport": "desktop",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\servicos-desktop.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/monte-seu-evento",
+      "viewport": "desktop",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\monte-seu-evento-desktop.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/galeria",
+      "viewport": "desktop",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\galeria-desktop.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/sobre",
+      "viewport": "desktop",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\sobre-desktop.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/duvidas",
+      "viewport": "desktop",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\duvidas-desktop.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/contato",
+      "viewport": "desktop",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\contato-desktop.png",
+      "hasOverflow": false
+    },
+    {
+      "page": "/admin",
+      "viewport": "desktop",
+      "screenshot": "C:\\Users\\massa\\Desktop\\eventos_demo\\audit-screenshots\\admin-desktop.png",
+      "hasOverflow": false
+    }
+  ],
+  "overflowIssues": [],
+  "consoleErrors": [],
+  "interactiveTests": {
+    "stepperFlow": {
+      "success": true,
+      "hasPriceEstimate": true,
+      "hasWhatsAppButton": true
+    }
+  }
+}

@@ -9,8 +9,8 @@ export function FloatingWhatsApp() {
   const pathname = usePathname();
   const [showTooltip, setShowTooltip] = useState(false);
 
-  // Hide on admin routes
-  if (pathname.startsWith('/admin')) {
+  // Hide on admin routes and wizard page where dedicated WhatsApp CTAs exist
+  if (pathname.startsWith('/admin') || pathname.startsWith('/monte-seu-evento')) {
     return null;
   }
 

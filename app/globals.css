@@ -27,6 +27,9 @@
   --color-brand-cream-200: #E9E2D7;
   --color-brand-cream-300: #DACFC1;
 
+  --font-serif: var(--font-serif), "Playfair Display", Georgia, serif;
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", system-ui, sans-serif;
+
   --color-brand-charcoal: #151D19;
   --color-brand-muted: #5C6762;
 }
