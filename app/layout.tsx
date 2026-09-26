@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google';
+import { Plus_Jakarta_Sans, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -8,12 +8,15 @@ import { FloatingWhatsApp } from '@/components/layout/FloatingWhatsApp';
 const sansFont = Plus_Jakarta_Sans({
   variable: '--font-sans',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
 
-const serifFont = Playfair_Display({
+const serifFont = Cormorant_Garamond({
   variable: '--font-serif',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
   display: 'swap',
 });
 

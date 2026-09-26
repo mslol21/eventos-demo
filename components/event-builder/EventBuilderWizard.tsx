@@ -4,19 +4,13 @@ import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import {
-  Users,
-  Calendar,
-  Clock,
-  Plus,
   Check,
   ArrowRight,
   ArrowLeft,
   MessageCircle,
   AlertCircle,
-  CheckCircle2,
   Copy,
-  ExternalLink,
-  ShieldAlert,
+  CheckCircle2,
 } from 'lucide-react';
 import { SERVICES_DATA } from '@/data/services';
 import { ADDONS_DATA } from '@/data/addons';
@@ -26,39 +20,40 @@ import { buildWhatsAppUrl, generateWhatsAppMessage } from '@/lib/whatsapp';
 import { saveLocalQuote } from '@/lib/storage';
 import { EventType, QuoteRequest } from '@/types';
 
-const EVENT_TYPE_OPTIONS: Array<{ id: EventType; label: string; icon: string }> = [
-  { id: 'aniversario', label: 'Aniversário', icon: '🎂' },
-  { id: 'casamento', label: 'Casamento / Noivado', icon: '💍' },
-  { id: 'confraternizacao', label: 'Confraternização', icon: '🍻' },
-  { id: 'empresarial', label: 'Evento Empresarial', icon: '💼' },
-  { id: 'infantil', label: 'Festa Infantil', icon: '🎈' },
-  { id: 'formatura', label: 'Formatura', icon: '🎓' },
-  { id: 'outro', label: 'Outro / Especial', icon: '✨' },
+// Strict Step Flow requested by user:
+// 1. evento -> 2. buffet -> 3. convidados -> 4. data -> 5. local -> 6. necessidades -> 7. contato -> 8. resumo -> WhatsApp
+const STEP_CONFIG = [
+  { id: 1, title: 'Tipo de Evento', shortLabel: 'Evento' },
+  { id: 2, title: 'Cardápio Desejado', shortLabel: 'Buffet' },
+  { id: 3, title: 'Quantidade de Convidados', shortLabel: 'Convidados' },
+  { id: 4, title: 'Data & Horário', shortLabel: 'Data' },
+  { id: 5, title: 'Local da Celebração', shortLabel: 'Local' },
+  { id: 6, title: 'Opcionais & Necessidades', shortLabel: 'Opcionais' },
+  { id: 7, title: 'Seus Dados para Contato', shortLabel: 'Contato' },
+  { id: 8, title: 'Resumo da Simulação', shortLabel: 'Resumo' },
 ];
 
-const GUEST_PRESETS = [
-  { label: 'Até 30', value: 30 },
-  { label: '31 – 50', value: 50 },
-  { label: '51 – 80', value: 80 },
-  { label: '81 – 100', value: 100 },
-  { label: 'Mais de 100', value: 120 },
+const EVENT_TYPE_OPTIONS: Array<{ id: EventType; label: string; icon: string; desc: string }> = [
+  { id: 'aniversario', label: 'Aniversário', icon: '🎂', desc: 'Comemoração com amigos e família' },
+  { id: 'casamento', label: 'Casamento / Noivado', icon: '💍', desc: 'Cerimônia ou festa intimista' },
+  { id: 'confraternizacao', label: 'Confraternização', icon: '🥂', desc: 'Encontro descontraído entre amigos' },
+  { id: 'empresarial', label: 'Corporativo / Empresa', icon: '💼', desc: 'Eventos de empresas e lançamentos' },
+  { id: 'infantil', label: 'Festa Infantil', icon: '🎈', desc: 'Comemoração para crianças e família' },
+  { id: 'outro', label: 'Outro Formato', icon: '✨', desc: 'Celebração sob medida ou formato especial' },
 ];
 
-const STEP_LABELS = [
-  'Buffet',
-  'Convidados',
-  'Data & Hora',
-  'Ocasião',
-  'Adicionais',
-  'Contato',
-];
+const GUEST_PRESETS = [20, 30, 40, 50, 70, 100, 150];
+const MIN_EVENT_DATE = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
 function WizardInner() {
   const searchParams = useSearchParams();
-  const initialService = searchParams.get('servico');
+  const initialService = searchParams.get('service') || searchParams.get('servico');
 
-  // Form State initialized with query param if valid
+  // Step state
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Form State
+  const [eventType, setEventType] = useState<EventType>('aniversario');
   const [serviceId, setServiceId] = useState<string>(() => {
     if (initialService && SERVICES_DATA.some((s) => s.id === initialService)) {
       return initialService;
@@ -69,28 +64,23 @@ function WizardInner() {
   const [customGuestMode, setCustomGuestMode] = useState<boolean>(false);
   const [eventDate, setEventDate] = useState<string>('');
   const [eventTime, setEventTime] = useState<string>('13:00');
-  const [eventType, setEventType] = useState<EventType>('aniversario');
-  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([
-    'bebidas-nao-alcoolicas',
-  ]);
+  const [city, setCity] = useState<string>('São Paulo');
+  const [neighborhood, setNeighborhood] = useState<string>('');
+  const [spaceType, setSpaceType] = useState<string>('casa');
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  const [notes, setNotes] = useState<string>('');
 
   // Contact State
   const [customerName, setCustomerName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [city, setCity] = useState<string>('São Paulo');
-  const [neighborhood, setNeighborhood] = useState<string>('');
-  const [address, setAddress] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
 
   // UI state
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
-  const [submittedQuote, setSubmittedQuote] = useState<QuoteRequest | null>(null);
 
-  // Real-time pricing estimate calculation
+  // Pricing calculation
   const pricing = useMemo(() => {
     return calculateEstimatedPrice(serviceId, guestCount, selectedAddonIds);
   }, [serviceId, guestCount, selectedAddonIds]);
@@ -103,174 +93,83 @@ function WizardInner() {
     return ADDONS_DATA.filter((a) => selectedAddonIds.includes(a.id));
   }, [selectedAddonIds]);
 
-  const toggleAddon = (addonId: string) => {
-    setSelectedAddonIds((prev) =>
-      prev.includes(addonId) ? prev.filter((id) => id !== addonId) : [...prev, addonId]
-    );
-  };
-
-  // Step Validation
+  // Validation per step
   const validateCurrentStep = (): boolean => {
     setErrorMsg(null);
-
     if (currentStep === 1) {
-      if (!serviceId) {
-        setErrorMsg('Selecione uma opção de buffet para continuar.');
-        return false;
-      }
-    } else if (currentStep === 2) {
-      if (!guestCount || guestCount < 10) {
-        setErrorMsg('Informe uma quantidade válida de convidados (mínimo 10).');
-        return false;
-      }
-    } else if (currentStep === 3) {
-      if (!eventDate) {
-        setErrorMsg('Por favor, informe a data prevista do evento.');
-        return false;
-      }
-    } else if (currentStep === 4) {
       if (!eventType) {
-        setErrorMsg('Selecione o tipo de evento.');
+        setErrorMsg('Por favor, selecione o tipo do seu evento.');
         return false;
       }
-    } else if (currentStep === 6) {
-      if (!customerName.trim() || customerName.trim().length < 2) {
-        setErrorMsg('Por favor, informe seu nome.');
+    }
+    if (currentStep === 2) {
+      if (!serviceId) {
+        setErrorMsg('Por favor, escolha uma opção de cardápio.');
+        return false;
+      }
+    }
+    if (currentStep === 3) {
+      if (!guestCount || guestCount < 10) {
+        setErrorMsg('Por favor, informe ao menos 10 convidados.');
+        return false;
+      }
+    }
+    if (currentStep === 4) {
+      if (!eventDate) {
+        setErrorMsg('Por favor, indique a data prevista do evento.');
+        return false;
+      }
+    }
+    if (currentStep === 5) {
+      if (!neighborhood.trim()) {
+        setErrorMsg('Por favor, informe ao menos o bairro do evento.');
+        return false;
+      }
+    }
+    if (currentStep === 7) {
+      if (!customerName.trim()) {
+        setErrorMsg('Por favor, digite seu nome.');
         return false;
       }
       const cleanPhone = phone.replace(/\D/g, '');
       if (cleanPhone.length < 10) {
-        setErrorMsg('Informe seu número de WhatsApp com DDD (ex: 11 98406-6393).');
-        return false;
-      }
-      if (!city.trim()) {
-        setErrorMsg('Informe a cidade onde será realizado o evento.');
-        return false;
-      }
-      if (!neighborhood.trim()) {
-        setErrorMsg('Informe o bairro do evento.');
+        setErrorMsg('Por favor, informe seu WhatsApp com DDD (mínimo 10 dígitos).');
         return false;
       }
     }
-
     return true;
   };
 
   const handleNext = () => {
     if (validateCurrentStep()) {
-      setCurrentStep((prev) => Math.min(prev + 1, 7));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setCurrentStep((prev) => Math.min(prev + 1, 8));
+      window.scrollTo({ top: 120, behavior: 'smooth' });
     }
   };
 
-  const handleBack = () => {
+  const handlePrev = () => {
     setErrorMsg(null);
     setCurrentStep((prev) => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 120, behavior: 'smooth' });
   };
 
-  // Structured WhatsApp Message & Submission
-  const handleFinalSubmit = async () => {
-    setIsSubmitting(true);
-    setErrorMsg(null);
-
-    const quoteData = {
-      customerName,
-      phone,
-      email: email || undefined,
-      eventType,
-      eventDate,
-      eventTime,
-      guestCount,
-      service: selectedService.name,
-      serviceId: selectedService.id,
-      selectedAddonIds,
-      addons: selectedAddonsFull.map((a) => a.name),
-      city,
-      neighborhood,
-      address,
-      notes,
-      estimatedPrice: pricing.totalEstimatedPrice,
-    };
-
-    let generatedQuote: QuoteRequest;
-
-    try {
-      const res = await fetch('/api/quotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(quoteData),
-      });
-
-      const json = await res.json();
-      if (json.success && json.data) {
-        generatedQuote = json.data;
-      } else {
-        throw new Error(json.error || 'Falha ao salvar');
-      }
-    } catch {
-      generatedQuote = {
-        id: `ORC-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
-        customerName,
-        phone,
-        email: email || undefined,
-        eventType,
-        eventDate,
-        eventTime,
-        guestCount,
-        service: selectedService.name,
-        serviceId: selectedService.id,
-        addons: selectedAddonsFull.map((a) => a.name),
-        city,
-        neighborhood,
-        address,
-        notes: notes || undefined,
-        estimatedPrice: pricing.totalEstimatedPrice,
-        status: 'novo',
-        createdAt: new Date().toISOString(),
-        internalNotes: 'Enviado pelo cliente via Monte seu Evento.',
-      };
-    }
-
-    saveLocalQuote(generatedQuote);
-    setSubmittedQuote(generatedQuote);
-    setIsCompleted(true);
-    setIsSubmitting(false);
-
-    const whatsAppMessage = generateWhatsAppMessage({
-      customerName,
-      eventType,
-      eventDate,
-      eventTime,
-      guestCount,
-      serviceName: selectedService.name,
-      addonsList: selectedAddonsFull.map((a) => a.name),
-      city,
-      neighborhood,
-      address,
-      notes,
-      estimatedPrice: pricing.totalEstimatedPrice,
-    });
-
-    const url = buildWhatsAppUrl(whatsAppMessage, COMPANY_CONFIG.whatsapp);
-
-    if (typeof window !== 'undefined') {
-      window.open(url, '_blank');
-    }
+  const toggleAddon = (id: string) => {
+    setSelectedAddonIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
   };
 
   const currentWhatsAppMessage = useMemo(() => {
     return generateWhatsAppMessage({
-      customerName: customerName || 'Nome do Cliente',
+      customerName: customerName || 'Cliente',
       eventType,
       eventDate,
       eventTime,
       guestCount,
       serviceName: selectedService.name,
-      addonsList: selectedAddonsFull.map((a) => a.name),
-      city: city || 'São Paulo',
-      neighborhood: neighborhood || 'Bairro',
-      address,
+      addonsList: selectedAddonsFull.map((a) => `${a.name} (Sob consulta)`),
+      city,
+      neighborhood: `${neighborhood} (${spaceType})`,
       notes,
       estimatedPrice: pricing.totalEstimatedPrice,
     });
@@ -284,10 +183,44 @@ function WizardInner() {
     selectedAddonsFull,
     city,
     neighborhood,
-    address,
+    spaceType,
     notes,
     pricing.totalEstimatedPrice,
   ]);
+
+  const handleCompleteAndSendWhatsApp = () => {
+    setIsSubmitting(true);
+
+    const generatedQuote: QuoteRequest = {
+      id: `quote-${Date.now()}`,
+      customerName: customerName.trim(),
+      phone: phone.trim(),
+      email: email.trim() || undefined,
+      eventType,
+      eventDate,
+      eventTime,
+      guestCount,
+      service: selectedService.name,
+      serviceId: selectedService.id,
+      addons: selectedAddonsFull.map((a) => a.name),
+      city,
+      neighborhood: `${neighborhood} (${spaceType})`,
+      address: `${neighborhood}, ${city} (${spaceType})`,
+      notes: notes || undefined,
+      estimatedPrice: pricing.totalEstimatedPrice,
+      status: 'novo',
+      createdAt: new Date().toISOString(),
+      internalNotes: 'Enviado pelo cliente via Monte seu Evento.',
+    };
+
+    saveLocalQuote(generatedQuote);
+    setIsSubmitting(false);
+
+    const url = buildWhatsAppUrl(currentWhatsAppMessage, COMPANY_CONFIG.whatsapp);
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank');
+    }
+  };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(currentWhatsAppMessage);
@@ -296,112 +229,81 @@ function WizardInner() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 pb-28 sm:pb-16">
-      {/* Progress Stepper Header */}
-      <div className="mb-8">
-        <div className="flex items-baseline justify-between gap-2 text-xs sm:text-sm font-semibold text-[#0B2F21] mb-3">
-          <div className="flex items-baseline gap-2 min-w-0">
-            <span className="font-serif font-bold text-sm sm:text-base text-[#0B2F21]">
-              {currentStep < 7 ? `Etapa ${currentStep} de 6:` : 'Resumo da Simulação'}
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-14 pb-32 sm:pb-20">
+      {/* Editorial Flow Header */}
+      <div className="mb-8 sm:mb-12">
+        <div className="flex items-baseline justify-between mb-3 text-xs sm:text-sm">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#C8521A] font-bold">
+              0{currentStep} / 08
             </span>
-            {currentStep <= 6 && (
-              <span className="text-[#5C6762] font-normal text-xs sm:text-sm truncate">
-                {STEP_LABELS[currentStep - 1]}
-              </span>
-            )}
+            <span className="text-[#8B7355] text-xs font-medium uppercase tracking-wider">
+              • {STEP_CONFIG[currentStep - 1].shortLabel}
+            </span>
           </div>
-          <span className="font-mono text-xs sm:text-sm font-bold text-[#E0631B] shrink-0">
-            {formatBRL(pricing.totalEstimatedPrice)}
-          </span>
+
+          <div className="font-mono text-xs font-semibold text-[#071E15]">
+            Estimativa: <span className="text-[#C8521A] font-bold">{formatBRL(pricing.totalEstimatedPrice)}</span>
+          </div>
         </div>
 
-        {/* Stepper Progress Indicator */}
-        <div className="grid grid-cols-6 gap-1.5 h-1.5 w-full">
-          {STEP_LABELS.map((_, i) => (
-            <div
-              key={i}
-              className={`rounded-full transition-colors duration-300 ${
-                i + 1 <= currentStep ? 'bg-[#E0631B]' : 'bg-[#E9E2D7]'
-              }`}
-            />
-          ))}
+        {/* Minimalist Progress Line */}
+        <div className="h-1 w-full bg-[#E5DFD5] rounded-full overflow-hidden">
+          <div
+            className="h-full bg-[#C8521A] transition-all duration-300 ease-out"
+            style={{ width: `${(currentStep / 8) * 100}%` }}
+          />
         </div>
       </div>
 
-      {/* Error Alert */}
+      {/* Error Feedback */}
       {errorMsg && (
-        <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-center gap-2.5">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+        <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-center gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
           <span>{errorMsg}</span>
         </div>
       )}
 
-      {/* STEP 1: Buffets */}
+      {/* STEP 1: EVENTO */}
       {currentStep === 1 && (
-        <div className="space-y-6">
-          <div className="text-left">
-            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
-              Etapa 1 de 6
-            </p>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
-              Qual experiência você procura?
-            </h1>
-            <p className="text-sm text-[#5C6762] mt-1">
-              Selecione o estilo gastronômico que mais combina com seu evento.
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#C8521A] block mb-1">
+              PASSO 01 • OCASIÃO
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Qual celebração vamos realizar?
+            </h2>
+            <p className="text-xs sm:text-sm text-[#55635C] mt-2 font-light">
+              Selecione o formato para adequarmos o estilo de atendimento e tempo de serviço.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {SERVICES_DATA.map((service) => {
-              const isSelected = serviceId === service.id;
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
+            {EVENT_TYPE_OPTIONS.map((opt) => {
+              const isSelected = eventType === opt.id;
               return (
                 <button
+                  key={opt.id}
                   type="button"
-                  key={service.id}
-                  onClick={() => setServiceId(service.id)}
-                  className={`text-left p-5 rounded-2xl border-2 transition-all duration-200 flex flex-col justify-between group relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] ${
+                  onClick={() => {
+                    setEventType(opt.id);
+                    setErrorMsg(null);
+                  }}
+                  className={`p-4 sm:p-5 rounded-2xl border text-left transition-all duration-150 active:scale-[0.98] ${
                     isSelected
-                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 shadow-md scale-[1.01]'
-                      : 'border-[#E9E2D7] bg-white hover:border-[#0B2F21]/30 hover:shadow-xs'
+                      ? 'border-[#C8521A] bg-[#FFF8F3] shadow-xs ring-1 ring-[#C8521A]'
+                      : 'border-[#E5DFD5] bg-white hover:border-[#071E15]/30'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="relative h-20 w-24 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-                      <Image
-                        src={service.heroImage}
-                        alt={service.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                        isSelected
-                          ? 'border-[#E0631B] bg-[#E0631B] text-white'
-                          : 'border-gray-300'
-                      }`}
-                    >
-                      {isSelected && <Check className="w-3.5 h-3.5" />}
-                    </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl">{opt.icon}</span>
+                    {isSelected && <Check className="w-4 h-4 text-[#C8521A]" />}
                   </div>
-
-                  <div>
-                    <h3 className="font-serif font-bold text-lg text-[#0B2F21]">
-                      {service.name}
-                    </h3>
-                    <p className="text-xs text-[#5C6762] mt-1 line-clamp-2">
-                      {service.shortDescription}
-                    </p>
-                  </div>
-
-                  {service.basePriceCash && (
-                    <div className="mt-3 pt-3 border-t border-[#F3EFE9] flex items-center justify-between text-xs">
-                      <span className="text-[#C44E0F] font-semibold">
-                        A partir de 10x R$ {service.basePriceInstallments}
-                      </span>
-                      <span className="text-gray-400">até 50 pessoas</span>
-                    </div>
-                  )}
+                  <h3 className="font-serif text-base sm:text-lg text-[#071E15] font-medium">
+                    {opt.label}
+                  </h3>
+                  <p className="text-xs text-[#55635C] mt-0.5 font-light">{opt.desc}</p>
                 </button>
               );
             })}
@@ -409,661 +311,574 @@ function WizardInner() {
         </div>
       )}
 
-      {/* STEP 2: Guests */}
+      {/* STEP 2: BUFFET */}
       {currentStep === 2 && (
-        <div className="space-y-6">
-          <div className="text-left">
-            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
-              Etapa 2 de 6
-            </p>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
-              Quantas pessoas participarão?
-            </h1>
-            <p className="text-sm text-[#5C6762] mt-1">
-              Escolha uma faixa rápida ou digite a quantidade exata de convidados.
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#C8521A] block mb-1">
+              PASSO 02 • GASTRONOMIA
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Qual cardápio melhor combina com sua festa?
+            </h2>
+            <p className="text-xs sm:text-sm text-[#55635C] mt-2 font-light">
+              Todos os pacotes incluem alimentação completa, bebidas não alcoólicas, equipe profissional e descartáveis.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {GUEST_PRESETS.map((preset) => {
-              const isSelected = !customGuestMode && guestCount === preset.value;
+          <div className="space-y-3 pt-2">
+            {SERVICES_DATA.map((srv) => {
+              const isSelected = serviceId === srv.id;
               return (
-                <button
-                  type="button"
-                  key={preset.label}
+                <div
+                  key={srv.id}
                   onClick={() => {
-                    setCustomGuestMode(false);
-                    setGuestCount(preset.value);
+                    setServiceId(srv.id);
+                    setErrorMsg(null);
                   }}
-                  className={`p-4 rounded-xl border-2 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] active:scale-[0.98] ${
+                  className={`p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-150 active:scale-[0.99] flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                     isSelected
-                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 text-[#0B2F21] font-bold shadow-xs'
-                      : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/30'
+                      ? 'border-[#C8521A] bg-[#FFF8F3] shadow-xs ring-1 ring-[#C8521A]'
+                      : 'border-[#E5DFD5] bg-white hover:border-[#071E15]/30'
                   }`}
                 >
-                  <Users className="w-5 h-5 mx-auto mb-1 text-[#E0631B]" />
-                  <span className="text-sm">{preset.label}</span>
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 bg-stone-100">
+                      <Image
+                        src={srv.heroImage}
+                        alt={srv.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-serif text-base sm:text-lg font-medium text-[#071E15]">
+                          {srv.name}
+                        </h3>
+                        {isSelected && <Check className="w-4 h-4 text-[#C8521A]" />}
+                      </div>
+                      <p className="text-xs text-[#55635C] mt-0.5 line-clamp-2 font-light">
+                        {srv.shortDescription}
+                      </p>
+                      {srv.basePriceCash && (
+                        <p className="text-xs font-semibold text-[#C8521A] mt-1.5 font-mono">
+                          Promoção até 50 pessoas: 10x de R$ {srv.basePriceInstallments} ou R$ {srv.basePriceCash.toLocaleString('pt-BR')} à vista
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* STEP 3: CONVIDADOS */}
+      {currentStep === 3 && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#C8521A] block mb-1">
+              PASSO 03 • CONVIDADOS
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Quantas pessoas você pretende receber?
+            </h2>
+            <p className="text-xs sm:text-sm text-[#55635C] mt-2 font-light">
+              Pacote promocional oficial estruturado para até 50 pessoas. Ajustamos para a quantidade exata da sua lista.
+            </p>
+          </div>
+
+          {/* Quick presets */}
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 pt-2">
+            {GUEST_PRESETS.map((preset) => {
+              const isSelected = !customGuestMode && guestCount === preset;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => {
+                    setCustomGuestMode(false);
+                    setGuestCount(preset);
+                    setErrorMsg(null);
+                  }}
+                  className={`py-3.5 rounded-xl border text-center transition-all duration-150 active:scale-[0.98] ${
+                    isSelected
+                      ? 'border-[#C8521A] bg-[#FFF8F3] text-[#071E15] font-bold ring-1 ring-[#C8521A]'
+                      : 'border-[#E5DFD5] bg-white text-[#55635C] hover:border-[#071E15]/30'
+                  }`}
+                >
+                  <span className="text-sm sm:text-base font-serif">{preset}</span>
+                  <span className="block text-[10px] text-[#8B7355]">convidados</span>
                 </button>
               );
             })}
-
-            <button
-              type="button"
-              onClick={() => setCustomGuestMode(true)}
-              className={`p-4 rounded-xl border-2 text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] active:scale-[0.98] ${
-                customGuestMode
-                  ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 text-[#0B2F21] font-bold shadow-xs'
-                  : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/30'
-              }`}
-            >
-              <Plus className="w-5 h-5 mx-auto mb-1 text-[#E0631B]" />
-              <span className="text-sm">Personalizado</span>
-            </button>
           </div>
 
-          {/* Custom Input & Slider */}
-          <div className="p-6 rounded-2xl bg-white border border-[#E9E2D7] space-y-4">
-            <div className="flex items-center justify-between">
-              <label htmlFor="guestInput" className="font-semibold text-sm text-[#0B2F21]">
-                Quantidade selecionada:
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  id="guestInput"
-                  type="number"
-                  min={10}
-                  max={500}
-                  value={guestCount}
-                  onChange={(e) => {
-                    setCustomGuestMode(true);
-                    setGuestCount(Math.max(10, parseInt(e.target.value) || 10));
-                  }}
-                  className="w-24 text-center font-serif text-xl font-bold p-2 rounded-lg border border-[#E9E2D7] focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-                />
-                <span className="text-sm text-[#5C6762]">pessoas</span>
-              </div>
+          {/* Custom guest count input */}
+          <div className="p-5 rounded-2xl bg-white border border-[#E5DFD5] flex items-center justify-between">
+            <div>
+              <span className="text-xs sm:text-sm font-medium text-[#071E15] block">
+                Outra quantidade de pessoas:
+              </span>
+              <span className="text-[11px] text-[#55635C] font-light">
+                Digite o número exato de adultos e crianças
+              </span>
             </div>
-
             <input
-              type="range"
-              min={15}
-              max={250}
-              step={5}
+              type="number"
+              min={10}
+              max={500}
               value={guestCount}
               onChange={(e) => {
                 setCustomGuestMode(true);
-                setGuestCount(parseInt(e.target.value));
+                setGuestCount(Math.max(10, parseInt(e.target.value) || 10));
               }}
-              className="w-full accent-[#E0631B] cursor-pointer"
+              className="w-24 text-center font-serif text-xl font-bold p-2 rounded-lg border border-[#E5DFD5] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
             />
-
-            <p className="text-xs text-[#5C6762]">
-              * Crianças de até 6 anos não contam no cálculo de buffet; de 7 a 10 anos pagam meia.
-            </p>
           </div>
         </div>
       )}
 
-      {/* STEP 3: Date & Time */}
-      {currentStep === 3 && (
-        <div className="space-y-6">
-          <div className="text-left">
-            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
-              Etapa 3 de 6
-            </p>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
-              Quando será o evento?
-            </h1>
-            <p className="text-sm text-[#5C6762] mt-1">
-              Informe a data prevista e o horário aproximado de início.
+      {/* STEP 4: DATA & HORÁRIO */}
+      {currentStep === 4 && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#C8521A] block mb-1">
+              PASSO 04 • AGENDA
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Qual é a data e o horário previsto?
+            </h2>
+            <p className="text-xs sm:text-sm text-[#55635C] mt-2 font-light">
+              Chegamos com antecedência ao local para montagem, mise en place e início pontual.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-[#E9E2D7] space-y-2">
-              <label htmlFor="eventDate" className="flex items-center gap-2 text-sm font-semibold text-[#0B2F21]">
-                <Calendar className="w-4 h-4 text-[#E0631B]" />
-                <span>Data prevista</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="p-5 rounded-2xl bg-white border border-[#E5DFD5] space-y-2">
+              <label htmlFor="eventDateInput" className="block text-xs font-semibold uppercase tracking-wider text-[#071E15]">
+                Data do Evento:
               </label>
               <input
-                id="eventDate"
+                id="eventDateInput"
                 type="date"
+                min={MIN_EVENT_DATE}
                 value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                className="w-full p-3.5 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-[#0B2F21] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
+                onChange={(e) => {
+                  setEventDate(e.target.value);
+                  setErrorMsg(null);
+                }}
+                className="w-full p-3 rounded-xl border border-[#E5DFD5] text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
               />
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-[#E9E2D7] space-y-2">
-              <label htmlFor="eventTime" className="flex items-center gap-2 text-sm font-semibold text-[#0B2F21]">
-                <Clock className="w-4 h-4 text-[#E0631B]" />
-                <span>Horário aproximado de início</span>
+            <div className="p-5 rounded-2xl bg-white border border-[#E5DFD5] space-y-2">
+              <label htmlFor="eventTimeInput" className="block text-xs font-semibold uppercase tracking-wider text-[#071E15]">
+                Horário de Início do Serviço:
               </label>
-              <select
-                id="eventTime"
+              <input
+                id="eventTimeInput"
+                type="time"
                 value={eventTime}
                 onChange={(e) => setEventTime(e.target.value)}
-                className="w-full p-3.5 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-[#0B2F21] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-              >
-                <option value="11:30">11h30 (Almoço)</option>
-                <option value="12:00">12h00 (Almoço)</option>
-                <option value="13:00">13h00 (Almoço / Tarde)</option>
-                <option value="16:00">16h00 (Sunset / Tarde)</option>
-                <option value="18:00">18h00 (Coquetel / Início noite)</option>
-                <option value="19:00">19h00 (Jantar)</option>
-                <option value="20:00">20h00 (Jantar / Festa)</option>
-                <option value="outro">Outro horário a combinar</option>
-              </select>
+                className="w-full p-3 rounded-xl border border-[#E5DFD5] text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
+              />
             </div>
           </div>
-
-          <div className="p-4 rounded-xl bg-[#FFF6F0] border border-[#FFE6D6] flex items-start gap-3">
-            <ShieldAlert className="w-5 h-5 text-[#E0631B] shrink-0 mt-0.5" />
-            <p className="text-xs sm:text-sm text-[#0B2F21]">
-              <strong>Importante:</strong> A disponibilidade da data será confirmada diretamente pela equipe SD Eventos após a conferência de nossa agenda e escala de equipes.
-            </p>
-          </div>
         </div>
       )}
 
-      {/* STEP 4: Event Type */}
-      {currentStep === 4 && (
-        <div className="space-y-6">
-          <div className="text-left">
-            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
-              Etapa 4 de 6
-            </p>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
-              Que tipo de evento será?
-            </h1>
-            <p className="text-sm text-[#5C6762] mt-1">
-              Isso nos ajuda a sugerir a melhor dinâmica de atendimento para seus convidados.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {EVENT_TYPE_OPTIONS.map((item) => {
-              const isSelected = eventType === item.id;
-              return (
-                <button
-                  type="button"
-                  key={item.id}
-                  onClick={() => setEventType(item.id)}
-                  className={`p-4 rounded-xl border-2 text-left flex items-center justify-between transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] active:scale-[0.98] ${
-                    isSelected
-                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 text-[#0B2F21] font-bold shadow-xs'
-                      : 'border-[#E9E2D7] bg-white text-[#5C6762] hover:border-[#0B2F21]/30'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{item.icon}</span>
-                    <span className="text-sm font-medium">{item.label}</span>
-                  </div>
-                  {isSelected && (
-                    <div className="w-5 h-5 rounded-full bg-[#E0631B] text-white flex items-center justify-center">
-                      <Check className="w-3.5 h-3.5" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* STEP 5: Add-ons */}
+      {/* STEP 5: LOCAL */}
       {currentStep === 5 && (
-        <div className="space-y-6">
-          <div className="text-left">
-            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
-              Etapa 5 de 6
-            </p>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
-              Personalize seu evento
-            </h1>
-            <p className="text-sm text-[#5C6762] mt-1">
-              Selecione itens complementares para enriquecer sua celebração.
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#C8521A] block mb-1">
+              PASSO 05 • LOCALIDADE
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Onde será realizada a celebração?
+            </h2>
+            <p className="text-xs sm:text-sm text-[#55635C] mt-2 font-light">
+              Atendemos toda a cidade de São Paulo, ABC Paulista e municípios vizinhos.
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-white border border-[#E5DFD5]">
+                <label htmlFor="cityInput" className="block text-xs font-semibold uppercase tracking-wider text-[#071E15] mb-2">
+                  Cidade:
+                </label>
+                <select
+                  id="cityInput"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-[#E5DFD5] text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
+                >
+                  <option value="São Paulo">São Paulo (Capital)</option>
+                  <option value="Santo André">Santo André (ABC)</option>
+                  <option value="São Bernardo do Campo">São Bernardo do Campo</option>
+                  <option value="São Caetano do Sul">São Caetano do Sul</option>
+                  <option value="Diadema">Diadema</option>
+                  <option value="Barueri / Alphaville">Barueri / Alphaville</option>
+                  <option value="Osasco">Osasco</option>
+                  <option value="Guarulhos">Guarulhos</option>
+                  <option value="Outra Cidade">Outra Cidade (Sob consulta)</option>
+                </select>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white border border-[#E5DFD5]">
+                <label htmlFor="neighborhoodInput" className="block text-xs font-semibold uppercase tracking-wider text-[#071E15] mb-2">
+                  Bairro:
+                </label>
+                <input
+                  id="neighborhoodInput"
+                  type="text"
+                  placeholder="Ex: Pinheiros, Moema, Campestre..."
+                  value={neighborhood}
+                  onChange={(e) => {
+                    setNeighborhood(e.target.value);
+                    setErrorMsg(null);
+                  }}
+                  className="w-full p-3 rounded-xl border border-[#E5DFD5] text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white border border-[#E5DFD5]">
+              <span className="block text-xs font-semibold uppercase tracking-wider text-[#071E15] mb-2">
+                Tipo do Espaço:
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { id: 'casa', label: 'Casa' },
+                  { id: 'apartamento', label: 'Salão de Prédio' },
+                  { id: 'chacara', label: 'Chácara / Sítio' },
+                  { id: 'empresa', label: 'Espaço Comercial' },
+                ].map((sp) => (
+                  <button
+                    key={sp.id}
+                    type="button"
+                    onClick={() => setSpaceType(sp.id)}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-medium transition-all ${
+                      spaceType === sp.id
+                        ? 'border-[#C8521A] bg-[#FFF8F3] text-[#071E15] font-bold'
+                        : 'border-[#E5DFD5] text-[#55635C]'
+                    }`}
+                  >
+                    {sp.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 6: NECESSIDADES & OPCIONAIS */}
+      {currentStep === 6 && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#C8521A] block mb-1">
+              PASSO 06 • ITENS SOB CONSULTA
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Deseja incluir adicionais sob consulta?
+            </h2>
+            <p className="text-xs sm:text-sm text-[#55635C] mt-2 font-light">
+              Itens opcionais para complementar o pacote base oficial. A equipe confirma a disponibilidade na proposta.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
             {ADDONS_DATA.map((addon) => {
-              const isSelected = selectedAddonIds.includes(addon.id);
+              const isChecked = selectedAddonIds.includes(addon.id);
               return (
                 <div
                   key={addon.id}
                   onClick={() => toggleAddon(addon.id)}
-                  className={`cursor-pointer p-4 sm:p-5 rounded-2xl border-2 transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-4 active:scale-[0.99] ${
-                    isSelected
-                      ? 'border-[#E0631B] bg-white ring-2 ring-[#E0631B]/15 shadow-xs'
-                      : 'border-[#E9E2D7] bg-white hover:border-[#0B2F21]/30'
+                  className={`p-4 rounded-xl border cursor-pointer transition-all duration-150 flex items-center justify-between ${
+                    isChecked
+                      ? 'border-[#C8521A] bg-[#FFF8F3] shadow-xs ring-1 ring-[#C8521A]'
+                      : 'border-[#E5DFD5] bg-white hover:border-[#071E15]/30'
                   }`}
                 >
-                  <div className="flex items-start gap-3.5">
+                  <div className="flex items-center gap-3">
                     <div
-                      className={`w-6 h-6 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                        isSelected
-                          ? 'border-[#E0631B] bg-[#E0631B] text-white'
-                          : 'border-gray-300 bg-[#FAF8F5]'
+                      className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                        isChecked ? 'bg-[#C8521A] border-[#C8521A] text-white' : 'border-[#E5DFD5]'
                       }`}
                     >
-                      {isSelected && <Check className="w-4 h-4" />}
+                      {isChecked && <Check className="w-3.5 h-3.5" />}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-sm sm:text-base text-[#0B2F21]">
-                          {addon.name}
-                        </h4>
-                        {addon.popular && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800">
-                            Popular
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-[#5C6762] mt-1 max-w-xl">
+                      <p className="text-xs sm:text-sm font-medium text-[#071E15]">
+                        {addon.name}
+                      </p>
+                      <p className="text-[11px] text-[#55635C] font-light">
                         {addon.description}
                       </p>
                     </div>
                   </div>
-
-                  <div className="text-right shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-100">
-                    <span className="font-bold text-sm text-[#0B2F21]">
-                      {addon.pricePerPerson
-                        ? `${formatBRL(addon.pricePerPerson)}`
-                        : `${formatBRL(addon.fixedPrice || 0)}`}
-                    </span>
-                    <span className="block text-[11px] text-[#5C6762]">
-                      {addon.unitLabel}
-                    </span>
-                  </div>
+                  <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8B7355] shrink-0 ml-2">
+                    Sob consulta
+                  </span>
                 </div>
               );
             })}
-          </div>
-        </div>
-      )}
 
-      {/* STEP 6: Event & Contact Details */}
-      {currentStep === 6 && (
-        <div className="space-y-6">
-          <div className="text-left">
-            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
-              Etapa 6 de 6
-            </p>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21] mt-1">
-              Dados do Evento & Contato
-            </h1>
-            <p className="text-sm text-[#5C6762] mt-1">
-              Para onde e para quem devemos formalizar a proposta?
-            </p>
-          </div>
-
-          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E9E2D7] shadow-xs space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label htmlFor="customerName" className="text-xs font-bold uppercase tracking-wider text-[#0B2F21]">
-                  Seu Nome Completo *
-                </label>
-                <input
-                  id="customerName"
-                  type="text"
-                  placeholder="Ex: Amanda Silva"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="customerPhone" className="text-xs font-bold uppercase tracking-wider text-[#0B2F21]">
-                  WhatsApp com DDD *
-                </label>
-                <input
-                  id="customerPhone"
-                  type="tel"
-                  placeholder="(11) 98406-6393"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label htmlFor="customerCity" className="text-xs font-bold uppercase tracking-wider text-[#0B2F21]">
-                  Cidade do Evento *
-                </label>
-                <input
-                  id="customerCity"
-                  type="text"
-                  placeholder="Ex: São Paulo"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="customerNeighborhood" className="text-xs font-bold uppercase tracking-wider text-[#0B2F21]">
-                  Bairro *
-                </label>
-                <input
-                  id="customerNeighborhood"
-                  type="text"
-                  placeholder="Ex: Moema / Tatuapé / Jardins"
-                  value={neighborhood}
-                  onChange={(e) => setNeighborhood(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="customerAddress" className="text-xs font-bold uppercase tracking-wider text-[#0B2F21]">
-                Endereço ou Tipo do Local (Opcional)
-              </label>
-              <input
-                id="customerAddress"
-                type="text"
-                placeholder="Ex: Salão de festas do condomínio, chácara da família, residência"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full p-3 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="customerEmail" className="text-xs font-bold uppercase tracking-wider text-[#0B2F21]">
-                E-mail (Opcional para envio de PDF)
-              </label>
-              <input
-                id="customerEmail"
-                type="email"
-                placeholder="Ex: amanda@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="customerNotes" className="text-xs font-bold uppercase tracking-wider text-[#0B2F21]">
-                Observações, restrições ou pedidos especiais
+            <div className="p-4 rounded-2xl bg-white border border-[#E5DFD5] mt-4">
+              <label htmlFor="notesInput" className="block text-xs font-semibold uppercase tracking-wider text-[#071E15] mb-2">
+                Restrições Alimentares ou Observações Especiais:
               </label>
               <textarea
-                id="customerNotes"
-                rows={3}
-                placeholder="Ex: Teremos convidados com restrição a lactose; local possui churrasqueira com pia ao lado."
+                id="notesInput"
+                rows={2}
+                placeholder="Ex: convidados vegetarianos, preferência por ponto da carne, etc."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full p-3 rounded-xl border border-[#E9E2D7] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
+                className="w-full p-3 rounded-xl border border-[#E5DFD5] text-xs sm:text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
               />
             </div>
           </div>
         </div>
       )}
 
-      {/* STEP 7: RESUMO & CONFIRMAÇÃO */}
+      {/* STEP 7: CONTATO */}
       {currentStep === 7 && (
-        <div className="space-y-6">
-          <div className="text-center">
-            <p className="text-xs uppercase tracking-wider text-[#E0631B] font-bold">
-              Tudo pronto
-            </p>
-            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#0B2F21] mt-1">
-              Seu evento está quase pronto 🎉
-            </h1>
-            <p className="text-sm text-[#5C6762] mt-2 max-w-xl mx-auto">
-              Confira os detalhes da sua simulação e envie para o WhatsApp da SD Eventos para validar a disponibilidade e receber o orçamento final.
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#C8521A] block mb-1">
+              PASSO 07 • SEUS DADOS
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Como podemos te chamar?
+            </h2>
+            <p className="text-xs sm:text-sm text-[#55635C] mt-2 font-light">
+              Informe seu WhatsApp para validarmos a data e enviarmos a proposta formal personalizada.
             </p>
           </div>
 
-          {/* Master Summary Card */}
-          <div className="bg-white rounded-3xl border border-[#E9E2D7] p-6 sm:p-8 shadow-xs space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-[#F3EFE9]">
-              <div>
-                <span className="text-xs uppercase tracking-wider text-[#C44E0F] font-bold">
-                  Cardápio Selecionado
-                </span>
-                <h3 className="font-serif text-2xl font-bold text-[#0B2F21]">
-                  {selectedService.name}
-                </h3>
-                <p className="text-xs text-[#5C6762] mt-1">
-                  {selectedService.tagline}
-                </p>
-              </div>
-
-              <div className="space-y-2 text-xs sm:text-sm">
-                <div className="flex justify-between">
-                  <span className="text-[#5C6762]">Tipo de evento:</span>
-                  <span className="font-semibold text-[#0B2F21] capitalize">
-                    {eventType}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#5C6762]">Convidados:</span>
-                  <span className="font-semibold text-[#0B2F21]">
-                    {guestCount} pessoas
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#5C6762]">Data prevista:</span>
-                  <span className="font-semibold text-[#0B2F21]">
-                    {eventDate
-                      ? `${eventDate.split('-')[2]}/${eventDate.split('-')[1]}/${
-                          eventDate.split('-')[0]
-                        }`
-                      : 'A combinar'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#5C6762]">Horário aproximado:</span>
-                  <span className="font-semibold text-[#0B2F21]">{eventTime}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#5C6762]">Local:</span>
-                  <span className="font-semibold text-[#0B2F21]">
-                    {neighborhood ? `${neighborhood}, ` : ''}
-                    {city}
-                  </span>
-                </div>
-              </div>
+          <div className="space-y-4 pt-2">
+            <div className="p-4 rounded-2xl bg-white border border-[#E5DFD5]">
+              <label htmlFor="nameInput" className="block text-xs font-semibold uppercase tracking-wider text-[#071E15] mb-2">
+                Seu Nome Completo:
+              </label>
+              <input
+                id="nameInput"
+                type="text"
+                placeholder="Ex: Mariana Castro"
+                value={customerName}
+                onChange={(e) => {
+                  setCustomerName(e.target.value);
+                  setErrorMsg(null);
+                }}
+                className="w-full p-3 rounded-xl border border-[#E5DFD5] text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
+              />
             </div>
 
-            {/* Selected Add-ons */}
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B2F21] mb-2">
-                Adicionais Escolhidos:
-              </h4>
-              {selectedAddonsFull.length > 0 ? (
-                <ul className="space-y-1.5 text-xs sm:text-sm text-[#5C6762]">
-                  {selectedAddonsFull.map((addon) => (
-                    <li key={addon.id} className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-[#E0631B]" />
-                      <span>{addon.name}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs text-gray-400 italic">
-                  Nenhum adicional selecionado.
-                </p>
-              )}
+            <div className="p-4 rounded-2xl bg-white border border-[#E5DFD5]">
+              <label htmlFor="phoneInput" className="block text-xs font-semibold uppercase tracking-wider text-[#071E15] mb-2">
+                WhatsApp com DDD:
+              </label>
+              <input
+                id="phoneInput"
+                type="tel"
+                placeholder="(11) 98765-4321"
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  setErrorMsg(null);
+                }}
+                className="w-full p-3 rounded-xl border border-[#E5DFD5] text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
+              />
             </div>
 
-            {/* Pricing Estimation Box */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#FFF6F0] to-[#FAF8F5] border-2 border-[#FFE6D6] space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#C44E0F]">
-                    Estimativa Inicial
-                  </span>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="font-serif text-3xl sm:text-4xl font-extrabold text-[#0B2F21]">
-                      {formatBRL(pricing.totalEstimatedPrice)}
-                    </span>
-                    <span className="text-xs text-[#5C6762]">
-                      ou em até 10x de {formatBRL(pricing.installments10x)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-left sm:text-right">
-                  <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                    Calculado para {guestCount} pessoas
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-[#FFE6D6] text-xs text-[#5C6762] space-y-1">
-                <p className="font-semibold text-[#0B2F21]">
-                  Atenção sobre valores:
-                </p>
-                <p>
-                  Este valor é apenas uma estimativa inicial. O orçamento final com itens detalhados, cardápio formal e eventuais taxas de deslocamento será confirmado e enviado pela equipe SD Eventos.
-                </p>
-              </div>
-            </div>
-
-            {/* Direct WhatsApp Action Button */}
-            <div className="pt-4 space-y-3">
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={handleFinalSubmit}
-                className="w-full flex items-center justify-center gap-3 py-4 sm:py-5 px-6 rounded-2xl text-sm sm:text-base font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-xl hover:shadow-2xl transition-all duration-200 active:scale-[0.98] disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-              >
-                <MessageCircle className="w-6 h-6" />
-                <span>
-                  {isSubmitting
-                    ? 'Preparando seu orçamento...'
-                    : 'Solicitar Orçamento pelo WhatsApp'}
-                </span>
-              </button>
-
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#5C6762] pt-2">
-                <button
-                  type="button"
-                  onClick={copyToClipboard}
-                  className="inline-flex items-center gap-1.5 hover:text-[#0B2F21] underline"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{copied ? 'Mensagem copiada!' : 'Copiar texto da mensagem'}</span>
-                </button>
-
-                <span className="text-gray-400">
-                  Canal oficial SD Eventos: {COMPANY_CONFIG.whatsappFormatted}
-                </span>
-              </div>
+            <div className="p-4 rounded-2xl bg-white border border-[#E5DFD5]">
+              <label htmlFor="emailInput" className="block text-xs font-semibold uppercase tracking-wider text-[#071E15] mb-2">
+                E-mail (Opcional):
+              </label>
+              <input
+                id="emailInput"
+                type="email"
+                placeholder="seuemail@exemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 rounded-xl border border-[#E5DFD5] text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
+              />
             </div>
           </div>
-
-          {/* Success Dialog */}
-          {isCompleted && (
-            <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-3">
-              <div className="flex items-center gap-2 font-bold text-base">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                <span>
-                  Solicitação {submittedQuote?.id ? `(${submittedQuote.id}) ` : ''}gerada com sucesso!
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm">
-                Caso a janela do WhatsApp não tenha aberto automaticamente, clique no botão abaixo para conversar com a nossa equipe agora mesmo:
-              </p>
-              <div className="pt-2">
-                <a
-                  href={buildWhatsAppUrl(currentWhatsAppMessage, COMPANY_CONFIG.whatsapp)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-emerald-700 transition-colors"
-                >
-                  <span>Abrir WhatsApp Novamente</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Desktop/Tablet Navigation Buttons (Back & Next) */}
-      <div className="mt-8 flex items-center justify-between pt-6 border-t border-[#E9E2D7]">
-        {currentStep > 1 && currentStep < 7 ? (
+      {/* STEP 8: RESUMO & WHATSAPP */}
+      {currentStep === 8 && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#C8521A] block mb-1">
+              PASSO 08 • CONFERÊNCIA
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Tudo pronto para sua festa!
+            </h2>
+            <p className="text-xs sm:text-sm text-[#55635C] mt-2 font-light">
+              Revise a simulação abaixo e envie com um clique para a equipe da SD Eventos no WhatsApp.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#E5DFD5] shadow-sm space-y-6">
+            {/* Header of summary */}
+            <div className="border-b border-[#E5DFD5] pb-4 flex items-center justify-between">
+              <div>
+                <span className="text-xs font-mono text-[#8B7355] uppercase tracking-wider">
+                  SOLICITANTE: {customerName}
+                </span>
+                <h3 className="font-serif text-xl sm:text-2xl font-medium text-[#071E15]">
+                  {selectedService.name}
+                </h3>
+              </div>
+              <span className="text-xs px-3 py-1 rounded-full bg-[#FAF7F2] border border-[#E5DFD5] text-[#071E15] font-semibold">
+                {guestCount} convidados
+              </span>
+            </div>
+
+            {/* Event Key Facts */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+              <div>
+                <span className="text-[#8B7355] block">Ocasião:</span>
+                <span className="font-medium text-[#071E15] capitalize">{eventType}</span>
+              </div>
+              <div>
+                <span className="text-[#8B7355] block">Data:</span>
+                <span className="font-medium text-[#071E15]">
+                  {eventDate ? eventDate.split('-').reverse().join('/') : 'A definir'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[#8B7355] block">Início:</span>
+                <span className="font-medium text-[#071E15]">{eventTime}</span>
+              </div>
+              <div>
+                <span className="text-[#8B7355] block">Local:</span>
+                <span className="font-medium text-[#071E15]">{neighborhood || city}</span>
+              </div>
+            </div>
+
+            {/* Included in official package */}
+            <div className="p-4 rounded-xl bg-[#FAF7F2] border border-[#E5DFD5]/80 space-y-2 text-xs">
+              <span className="font-semibold text-[#071E15] block">
+                Itens inclusos no pacote padrão oficial:
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[#55635C]">
+                <div>• Alimentação completa preparada no local</div>
+                <div>• Bebidas não alcoólicas inclusas</div>
+                <div>• Equipe profissional de atendimento</div>
+                <div>• Descartáveis completos inclusos</div>
+              </div>
+            </div>
+
+            {/* Optional items if selected */}
+            {selectedAddonsFull.length > 0 && (
+              <div className="text-xs space-y-1">
+                <span className="font-semibold text-[#071E15] block">
+                  Adicionais selecionados (Sob consulta):
+                </span>
+                {selectedAddonsFull.map((a) => (
+                  <div key={a.id} className="text-[#55635C]">
+                    + {a.name}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Price Box */}
+            <div className="p-5 rounded-2xl bg-[#FFF8F3] border border-[#F3DFC9] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-[11px] uppercase tracking-wider text-[#C8521A] font-semibold block">
+                  Estimativa Inicial Base
+                </span>
+                <span className="font-serif text-3xl font-semibold text-[#071E15]">
+                  {formatBRL(pricing.totalEstimatedPrice)}
+                </span>
+                {selectedService.basePriceInstallments && (
+                  <p className="text-xs text-[#55635C] mt-0.5">
+                    ou em até 10x sem burocracia na confirmação
+                  </p>
+                )}
+              </div>
+
+              <div className="text-[11px] text-[#7A8A82] italic sm:text-right max-w-xs">
+                * Valores demonstrativos sujeitos à confirmação conforme data, endereço e disponibilidade da equipe.
+              </div>
+            </div>
+
+            {/* Primary WhatsApp Action */}
+            <button
+              type="button"
+              onClick={handleCompleteAndSendWhatsApp}
+              disabled={isSubmitting}
+              className="w-full py-4 px-6 rounded-2xl bg-[#25D366] text-[#071E15] font-semibold text-sm uppercase tracking-wider hover:bg-[#20ba5a] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.99]"
+            >
+              <MessageCircle className="w-5 h-5 text-[#071E15]" />
+              <span>Enviar Proposta no WhatsApp da SD Eventos</span>
+            </button>
+
+            {/* Copy message helper */}
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={copyToClipboard}
+                className="inline-flex items-center gap-2 text-xs text-[#55635C] hover:text-[#071E15] transition-colors"
+              >
+                {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Mensagem copiada para a área de transferência!' : 'Copiar texto da mensagem'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ergonomic Navigation Bar */}
+      <div className="mt-8 flex items-center justify-between pt-6 border-t border-[#E5DFD5]">
+        {currentStep > 1 ? (
           <button
             type="button"
-            onClick={handleBack}
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold border border-[#E9E2D7] bg-white text-[#0B2F21] hover:bg-[#FAF8F5] transition-colors active:scale-[0.98]"
+            onClick={handlePrev}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-[#E5DFD5] bg-white text-xs font-semibold text-[#071E15] hover:bg-stone-50 transition-colors active:scale-[0.98]"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
             <span>Voltar</span>
-          </button>
-        ) : currentStep === 7 ? (
-          <button
-            type="button"
-            onClick={handleBack}
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold border border-[#E9E2D7] bg-white text-[#0B2F21] hover:bg-[#FAF8F5] transition-colors active:scale-[0.98]"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Editar Informações</span>
           </button>
         ) : (
           <div />
         )}
 
-        {currentStep < 7 && (
+        {currentStep < 8 && (
           <button
             type="button"
             onClick={handleNext}
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] shadow-sm hover:shadow-md transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B]"
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#071E15] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#124330] transition-colors active:scale-[0.98] shadow-sm ml-auto"
           >
-            <span>{currentStep === 6 ? 'Ver Resumo Final' : 'Avançar'}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Continuar</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
-
-      {/* Sticky Ergonomic Bottom Action Bar for Mobile (360px - 430px) */}
-      {currentStep < 7 && (
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 border-t border-[#E9E2D7] backdrop-blur-md z-30 flex items-center justify-between shadow-lg pb-safe">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-[#5C6762] uppercase tracking-wider font-semibold">
-              Estimativa
-            </span>
-            <span className="font-serif font-bold text-base text-[#0B2F21]">
-              {formatBRL(pricing.totalEstimatedPrice)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {currentStep > 1 && (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="p-2.5 rounded-xl border border-[#E9E2D7] text-[#0B2F21] bg-white active:scale-95"
-                aria-label="Voltar etapa anterior"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleNext}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#E0631B] text-white text-xs uppercase tracking-wider font-bold shadow-sm active:scale-95"
-            >
-              <span>{currentStep === 6 ? 'Resumo' : 'Avançar'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 export function EventBuilderWizard() {
   return (
-    <Suspense fallback={<div className="py-20 text-center text-sm text-[#5C6762]">Carregando simulador de eventos...</div>}>
+    <Suspense
+      fallback={
+        <div className="py-20 text-center font-serif text-lg text-[#071E15]">
+          Carregando simulador da SD Eventos...
+        </div>
+      }
+    >
       <WizardInner />
     </Suspense>
   );

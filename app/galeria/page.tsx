@@ -1,30 +1,40 @@
 import React from 'react';
 import { Metadata } from 'next';
-import { Camera } from 'lucide-react';
 import { GalleryGrid } from '@/components/gallery/GalleryGrid';
+import { COMPANY_CONFIG } from '@/data/company';
+import { InstagramIcon } from '@/components/ui/InstagramIcon';
 
 export const metadata: Metadata = {
   title: 'Galeria de Fotos dos Nossos Eventos',
   description:
-    'Veja fotos reais de nossos buffets a domicílio: churrascos, finger foods requintados, festivais de massas e montagens de mesas para festas.',
+    'Veja fotos reais dos nossos buffets a domicílio: churrasco nobre na brasa, finger foods contemporâneos e festival de massas artesanais.',
 };
 
 export default function GaleriaPage() {
   return (
-    <div className="py-12 sm:py-20 bg-[#FAF8F5]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFF6F0] text-[#E0631B] text-xs font-bold uppercase tracking-wider mb-3">
-            <Camera className="w-3.5 h-3.5" />
-            <span>Nossos Registros</span>
-          </div>
-          <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#0B2F21] tracking-tight mb-4">
-            Galeria de Eventos
-          </h1>
-          <p className="text-base sm:text-lg text-[#5C6762] leading-relaxed">
-            Confira detalhes da apresentação, suculência dos pratos e o capricho da equipe SD Eventos nas mais variadas comemorações.
+    <div className="py-16 sm:py-28 bg-[#FAF7F2] text-[#121815]">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+        {/* Editorial Header */}
+        <div className="max-w-3xl mb-14 sm:mb-20">
+          <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-[#C8521A] font-bold mb-3">
+            REGISTROS GASTRONÔMICOS & MONTAGENS
           </p>
+          <h1 className="font-serif text-4xl sm:text-6xl font-normal leading-tight text-[#071E15] tracking-tight mb-4">
+            Galeria de Eventos.
+          </h1>
+          <p className="text-base sm:text-lg text-[#55635C] font-light leading-relaxed mb-6">
+            Confira detalhes da apresentação, suculência dos pratos e a dedicação da equipe SD Eventos nas mais variadas comemorações em São Paulo e região.
+          </p>
+
+          <a
+            href={COMPANY_CONFIG.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#071E15] hover:text-[#C8521A] transition-colors"
+          >
+            <InstagramIcon className="w-4 h-4 text-[#C8521A]" />
+            <span>Acompanhe mais no Instagram: {COMPANY_CONFIG.instagram} →</span>
+          </a>
         </div>
 
         {/* Interactive Gallery */}

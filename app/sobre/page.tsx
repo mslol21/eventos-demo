@@ -2,158 +2,137 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import {
-  Sparkles,
-  Heart,
-  ShieldCheck,
-  Award,
-  Users,
-  Clock,
-  ArrowRight,
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Sobre a SD Eventos | Nossa História e Propósito',
+  title: 'Sobre a SD Eventos | Hospitalidade e Buffet a Domicílio',
   description:
-    'Conheça a SD Eventos: buffet a domicílio com foco em gastronomia afetiva, organização impecável e atendimento acolhedor para festas e eventos corporativos.',
+    'Conheça a história e os valores da SD Eventos: gastronomia artesanal, pontualidade rigorosa e atendimento acolhedor para celebrações inesquecíveis em São Paulo.',
 };
 
-export default function SobrePage() {
+const PILLARS = [
+  {
+    num: '01',
+    title: 'Qualidade dos Insumos',
+    desc: 'Ingredientes frescos selecionados, carnes nobres e massas artesanais salteadas na hora do evento.',
+  },
+  {
+    num: '02',
+    title: 'Pontualidade Rigorosa',
+    desc: 'Chegada da equipe com antecedência para montagem meticulosa da área e início pontual do serviço.',
+  },
+  {
+    num: '03',
+    title: 'Equipe Uniformizada',
+    desc: 'Profissionais alinhados, educados e dedicados a proporcionar uma recepção acolhedora a todos os convidados.',
+  },
+  {
+    num: '04',
+    title: 'Fartura & Cuidado',
+    desc: 'Cálculos generosos por pessoa para assegurar que cada convidado seja servido com fartura e atenção contínua.',
+  },
+];
+
+export function SobrePage() {
   return (
-    <div className="py-12 sm:py-20 bg-[#FAF8F5]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-        {/* Hero Section of About */}
-        <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF7F2] text-[#1E694D] text-xs font-bold uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-[#E0631B]" />
-            <span>Sobre a SD Eventos</span>
-          </div>
-          <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#0B2F21] tracking-tight mb-6">
-            Mais do que servir comida, ajudamos a criar momentos.
+    <div className="py-16 sm:py-28 bg-[#FAF7F2] text-[#121815]">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 space-y-24 sm:space-y-36">
+        {/* Editorial Intro */}
+        <div className="max-w-3xl">
+          <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-[#C8521A] font-bold mb-3">
+            NOSSA TRAJETÓRIA & PROPÓSITO
+          </p>
+          <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-normal leading-[0.95] tracking-[-0.03em] text-[#071E15] mb-6">
+            Mais do que servir comida, cuidamos de momentos felizes.
           </h1>
-          <p className="text-base sm:text-lg text-[#5C6762] leading-relaxed">
-            A SD Eventos nasceu do propósito de libertar o anfitrião do trabalho pesado da cozinha para que ele possa viver o que realmente importa: celebrar com quem ama.
+          <p className="text-base sm:text-lg text-[#55635C] font-light leading-relaxed">
+            A SD Eventos nasceu da convicção de que quem convida merece celebrar junto aos seus familiares e amigos, sem a sobrecarga da cozinha ou a preocupação com o serviço.
           </p>
         </div>
 
-        {/* Story & Image 2-col */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div className="relative h-[380px] sm:h-[480px] rounded-3xl overflow-hidden shadow-xl border-4 border-white">
-            <Image
-              src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=80"
-              alt="Mesa de buffet bem cuidada pela equipe SD Eventos"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
+        {/* Narrative & Full-Bleed Image */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+          <div className="lg:col-span-6">
+            <div className="relative aspect-[4/3] sm:aspect-[16/11] rounded-2xl overflow-hidden shadow-xl bg-stone-200">
+              <Image
+                src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=85"
+                alt="Montagem de buffet e hospitalidade em evento da SD Eventos"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            </div>
           </div>
 
-          <div className="space-y-6">
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21]">
-              Nossa Trajetória
+          <div className="lg:col-span-6 space-y-6">
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#071E15] font-normal tracking-tight">
+              Hospitalidade levada ao seu espaço.
             </h2>
-            <p className="text-sm sm:text-base text-[#5C6762] leading-relaxed">
-              O que começou como reuniões intimistas de amigos e familiares rapidamente se transformou em uma operação especializada de buffet a domicílio. Percebemos que as pessoas queriam a qualidade de um restaurante renomado ou churrascaria no conforto de suas casas, condomínios e chácaras.
+            <p className="text-sm sm:text-base text-[#55635C] font-light leading-relaxed">
+              O que começou como comemorações intimistas entre amigos rapidamente expandiu-se para uma estrutura profissional de buffet a domicílio. Levamos a gastronomia completa para casas, salões de condomínio, chácaras e empresas.
             </p>
-            <p className="text-sm sm:text-base text-[#5C6762] leading-relaxed">
-              Hoje, a <strong className="text-[#0B2F21]">SD Eventos</strong> conta com equipes treinadas de churrasqueiros, chefs de massas, cozinheiros, garçons e copeiras. Cuidamos do transporte seguro dos insumos, montagem elegante dos pontos de serviço, preparo na hora e limpeza contínua durante todo o evento.
+            <p className="text-sm sm:text-base text-[#55635C] font-light leading-relaxed">
+              Nossa operação integra equipe treinada de churrasqueiros, cozinheiros e atendimento, cuidando do transporte dos insumos, preparação in loco e higienização durante o evento.
             </p>
-
-            <div className="pt-2">
-              <div className="p-4 rounded-2xl bg-white border border-[#E9E2D7] flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#FFF6F0] flex items-center justify-center shrink-0">
-                  <Heart className="w-6 h-6 text-[#E0631B]" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-[#0B2F21]">Compromisso com o Anfitrião</h4>
-                  <p className="text-xs text-[#5C6762]">Você é o convidado de honra da sua própria festa.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 4 Pillars of Excellence */}
-        <div className="space-y-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B2F21]">
-              Os 4 Pilares da Nossa Entrega
-            </h2>
-            <p className="text-sm text-[#5C6762] mt-2">
-              Tudo o que fazemos é guiado por padrões rigorosos de qualidade e hospitalidade.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-2xl border border-[#E9E2D7] shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h3 className="font-serif font-bold text-base text-[#0B2F21]">
-                Qualidade dos Insumos
-              </h3>
-              <p className="text-xs text-[#5C6762] leading-relaxed">
-                Carnes nobres com procedência garantida, massas frescas selecionadas e guarnições feitas no dia do evento.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-[#E9E2D7] shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-[#E0631B]">
-                <Clock className="w-5 h-5" />
-              </div>
-              <h3 className="font-serif font-bold text-base text-[#0B2F21]">
-                Pontualidade Britânica
-              </h3>
-              <p className="text-xs text-[#5C6762] leading-relaxed">
-                Chegada ao local com 2 horas de antecedência para organização minuciosa do mise en place e início pontual.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-[#E9E2D7] shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800">
-                <Users className="w-5 h-5" />
-              </div>
-              <h3 className="font-serif font-bold text-base text-[#0B2F21]">
-                Equipe Uniformizada
-              </h3>
-              <p className="text-xs text-[#5C6762] leading-relaxed">
-                Profissionais alinhados, educados e proativos que tratam seus familiares e convidados com extrema cortesia.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-[#E9E2D7] shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-800">
-                <Award className="w-5 h-5" />
-              </div>
-              <h3 className="font-serif font-bold text-base text-[#0B2F21]">
-                Fartura & Reposição
-              </h3>
-              <p className="text-xs text-[#5C6762] leading-relaxed">
-                Cálculos generosos por pessoa para assegurar que nenhum convidado fique sem comer bem do início ao fim.
+            <div className="border-l-2 border-[#C8521A] pl-5 py-1">
+              <p className="font-serif text-lg text-[#071E15] italic">
+                &ldquo;Trabalhamos para que cada anfitrião possa apenas relaxar e desfrutar do carinho dos seus convidados.&rdquo;
               </p>
             </div>
           </div>
         </div>
 
-        {/* CTA banner */}
-        <div className="bg-[#0B2F21] text-white rounded-3xl p-8 sm:p-12 text-center space-y-6">
-          <h2 className="font-serif text-2xl sm:text-4xl font-bold max-w-2xl mx-auto">
-            Queremos fazer parte da sua próxima história feliz.
-          </h2>
-          <p className="text-sm sm:text-base text-[#E9E2D7]/80 max-w-xl mx-auto">
-            Faça uma simulação rápida no nosso site e receba os detalhes organizados diretamente no WhatsApp.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/monte-seu-evento"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] shadow-lg transition-all"
-            >
-              <span>Montar Meu Evento Agora</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+        {/* 4 Pillars without artificial boxes */}
+        <div>
+          <div className="max-w-2xl mb-12">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-[#C8521A] font-bold mb-2">
+              PADRÃO OPERACIONAL
+            </p>
+            <h2 className="font-serif text-3xl sm:text-5xl font-normal text-[#071E15]">
+              Nossos quatro compromissos com o seu evento.
+            </h2>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-4 border-t border-[#E5DFD5]">
+            {PILLARS.map((p) => (
+              <div key={p.num} className="space-y-3">
+                <span className="font-serif text-3xl text-[#C8521A] font-light block">
+                  {p.num}
+                </span>
+                <h3 className="font-serif text-xl font-normal text-[#071E15]">
+                  {p.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#55635C] font-light leading-relaxed">
+                  {p.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Editorial Closing Banner */}
+        <div className="p-8 sm:p-14 rounded-3xl bg-[#071E15] text-white flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="max-w-xl">
+            <h3 className="font-serif text-2xl sm:text-4xl font-normal mb-3">
+              Vamos planejar sua comemoração?
+            </h3>
+            <p className="text-sm text-[#FAF8F5]/80 font-light leading-relaxed">
+              Use nosso simulador digital para receber uma estimativa transparente ou converse diretamente com nossa equipe.
+            </p>
+          </div>
+
+          <Link
+            href="/monte-seu-evento"
+            className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-[#E0631B] text-white text-xs sm:text-sm font-semibold uppercase tracking-wider hover:bg-[#C44E0F] transition-all shrink-0 active:scale-[0.98] shadow-xl"
+          >
+            <span>Montar meu evento</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </div>
   );
 }
+
+export default SobrePage;

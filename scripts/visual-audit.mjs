@@ -94,6 +94,25 @@ async function runVisualAudit() {
           console.log(`  ✓ ${p.path} [${vp.name}]: No overflow (doc: ${overflow.docWidth}px / win: ${overflow.windowWidth}px)`);
         }
 
+        // Pre-scroll to trigger Next.js image lazy loading
+        await page.evaluate(async () => {
+          await new Promise((resolve) => {
+            let totalHeight = 0;
+            const distance = 600;
+            const timer = setInterval(() => {
+              const scrollHeight = document.body.scrollHeight;
+              window.scrollBy(0, distance);
+              totalHeight += distance;
+              if (totalHeight >= scrollHeight) {
+                clearInterval(timer);
+                window.scrollTo(0, 0);
+                resolve();
+              }
+            }, 60);
+          });
+        });
+        await page.waitForTimeout(600);
+
         // Take screenshot
         const screenshotPath = path.join(
           SCREENSHOT_DIR,
@@ -120,44 +139,47 @@ async function runVisualAudit() {
     const flowPage = await flowContext.newPage();
     await flowPage.goto('http://localhost:3000/monte-seu-evento', { waitUntil: 'load' });
 
-    // Step 1: Select "Festival de Massas"
-    console.log('  -> Selecting service...');
-    await flowPage.click('text=Festival de Massas Artesanais');
-    await flowPage.click('text=Avançar');
-
-    // Step 2: Select Guests 31-50
-    console.log('  -> Selecting guest count...');
-    await flowPage.click('text=31 – 50');
-    await flowPage.click('text=Avançar');
-
-    // Step 3: Date & time
-    console.log('  -> Filling date & time...');
-    await flowPage.fill('#eventDate', '2026-12-15');
-    await flowPage.click('text=Avançar');
-
-    // Step 4: Event type
+    // Step 1: Select Event Type
     console.log('  -> Selecting event type...');
     await flowPage.click('text=Casamento / Noivado');
-    await flowPage.click('text=Avançar');
+    await flowPage.click('text=Continuar');
 
-    // Step 5: Add-ons
+    // Step 2: Select Buffet
+    console.log('  -> Selecting buffet service...');
+    await flowPage.click('text=Festival de Massas Artesanais');
+    await flowPage.click('text=Continuar');
+
+    // Step 3: Select Guests 50
+    console.log('  -> Selecting guest count...');
+    await flowPage.click('text=50');
+    await flowPage.click('text=Continuar');
+
+    // Step 4: Date & time
+    console.log('  -> Filling date & time...');
+    await flowPage.fill('#eventDateInput', '2026-12-15');
+    await flowPage.click('text=Continuar');
+
+    // Step 5: Local
+    console.log('  -> Filling location...');
+    await flowPage.fill('#neighborhoodInput', 'Pinheiros');
+    await flowPage.click('text=Continuar');
+
+    // Step 6: Opcionais
     console.log('  -> Selecting addons...');
     await flowPage.click('text=Mesa de Sobremesas Nobres');
-    await flowPage.click('text=Avançar');
+    await flowPage.click('text=Continuar');
 
-    // Step 6: Contact info
+    // Step 7: Contato
     console.log('  -> Filling contact info...');
-    await flowPage.fill('#customerName', 'Roberta Lima');
-    await flowPage.fill('#customerPhone', '11988889999');
-    await flowPage.fill('#customerCity', 'São Paulo');
-    await flowPage.fill('#customerNeighborhood', 'Pinheiros');
-    await flowPage.click('text=Ver Resumo Final');
+    await flowPage.fill('#nameInput', 'Roberta Lima');
+    await flowPage.fill('#phoneInput', '11988889999');
+    await flowPage.click('text=Continuar');
 
-    // Step 7: Verify Summary & WhatsApp CTA
+    // Step 8: Verify Summary & WhatsApp CTA
     console.log('  -> Checking Summary Step...');
-    await flowPage.waitForSelector('text=Seu evento está quase pronto');
-    const hasPriceEstimate = await flowPage.isVisible('text=Estimativa Inicial');
-    const hasWhatsAppButton = await flowPage.isVisible('text=Solicitar Orçamento pelo WhatsApp');
+    await flowPage.waitForSelector('text=Tudo pronto para sua festa!');
+    const hasPriceEstimate = await flowPage.isVisible('text=Estimativa Inicial Base');
+    const hasWhatsAppButton = await flowPage.isVisible('text=Enviar Proposta no WhatsApp da SD Eventos');
 
     auditReport.interactiveTests.stepperFlow = {
       success: hasPriceEstimate && hasWhatsAppButton,

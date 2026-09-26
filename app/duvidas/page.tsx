@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { ChevronDown, Search, HelpCircle, CalendarClock, MessageCircle } from 'lucide-react';
+import { ChevronDown, Search, MessageCircle } from 'lucide-react';
 import { FAQ_DATA } from '@/data/faq';
 import { COMPANY_CONFIG } from '@/data/company';
 
@@ -30,117 +29,90 @@ export default function DuvidasPage() {
   )}`;
 
   return (
-    <div className="py-12 sm:py-20 bg-[#FAF8F5]">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFF6F0] text-[#E0631B] text-xs font-bold uppercase tracking-wider">
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span>Central de Dúvidas</span>
-          </div>
-          <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#0B2F21] tracking-tight">
-            Perguntas Frequentes
+    <div className="py-16 sm:py-28 bg-[#FAF7F2] text-[#121815]">
+      <div className="max-w-4xl mx-auto px-5 sm:px-8 space-y-16">
+        {/* Editorial Header */}
+        <div className="max-w-3xl">
+          <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-[#C8521A] font-bold mb-3">
+            TRANSPARÊNCIA TOTAL
+          </p>
+          <h1 className="font-serif text-4xl sm:text-6xl font-normal leading-tight text-[#071E15] tracking-tight mb-4">
+            Dúvidas Frequentes.
           </h1>
-          <p className="text-base sm:text-lg text-[#5C6762] max-w-2xl mx-auto">
-            Reunimos as respostas para as principais perguntas que nossos clientes fazem sobre cardápios, regiões de atendimento e dinâmica do evento.
+          <p className="text-base sm:text-lg text-[#55635C] font-light leading-relaxed">
+            Reunimos as respostas para as principais questões sobre cardápios, equipe, bebidas, horários e formas de pagamento.
           </p>
 
           {/* Search bar */}
-          <div className="relative max-w-md mx-auto pt-4">
-            <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 mt-2" />
+          <div className="relative max-w-lg pt-6">
+            <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2 mt-3" />
             <input
               type="text"
-              placeholder="Buscar por pergunta ou palavra-chave..."
+              placeholder="Buscar por pergunta ou assunto..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-[#E9E2D7] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#E0631B] shadow-xs"
+              className="w-full pl-11 pr-4 py-3.5 rounded-full border border-[#E5DFD5] bg-white text-xs sm:text-sm text-[#071E15] focus:outline-none focus:ring-1 focus:ring-[#C8521A]"
             />
           </div>
         </div>
 
-        {/* FAQs List */}
-        <div className="space-y-4">
-          {filteredFaqs.length > 0 ? (
+        {/* Editorial Accordion */}
+        <div className="divide-y divide-[#E5DFD5] border-y border-[#E5DFD5]">
+          {filteredFaqs.length === 0 ? (
+            <div className="py-12 text-center text-sm text-[#55635C]">
+              Nenhuma dúvida encontrada para &ldquo;{search}&rdquo;. Converse com nossa equipe no WhatsApp!
+            </div>
+          ) : (
             filteredFaqs.map((faq) => {
               const isOpen = openIds.includes(faq.id);
               return (
-                <div
-                  key={faq.id}
-                  className="bg-white rounded-2xl border border-[#E9E2D7] overflow-hidden shadow-xs hover:border-[#0B2F21]/30 transition-colors"
-                >
+                <div key={faq.id} className="py-6">
                   <button
                     type="button"
                     onClick={() => toggleItem(faq.id)}
                     aria-expanded={isOpen}
-                    className="w-full flex items-center justify-between p-5 sm:p-6 text-left hover:bg-[#FCFBF9] transition-colors focus:outline-none"
+                    className="w-full flex items-start justify-between text-left group focus:outline-none"
                   >
-                    <div>
-                      {faq.category && (
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-[#C44E0F] block mb-1">
-                          {faq.category}
-                        </span>
-                      )}
-                      <span className="font-serif font-bold text-base sm:text-lg text-[#0B2F21]">
-                        {faq.question}
-                      </span>
-                    </div>
+                    <span className="font-serif text-xl sm:text-2xl font-normal text-[#071E15] group-hover:text-[#C8521A] transition-colors pr-6">
+                      {faq.question}
+                    </span>
                     <ChevronDown
-                      className={`w-5 h-5 text-[#E0631B] shrink-0 ml-4 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180' : ''
+                      className={`w-5 h-5 text-[#8B7355] shrink-0 mt-1 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-[#C8521A]' : ''
                       }`}
                     />
                   </button>
-
                   {isOpen && (
-                    <div className="px-5 sm:px-6 pb-6 pt-2 text-sm sm:text-base text-[#5C6762] leading-relaxed border-t border-[#F3EFE9]">
+                    <div className="pt-4 text-xs sm:text-sm text-[#55635C] leading-relaxed font-light animate-in fade-in duration-200">
                       {faq.answer}
                     </div>
                   )}
                 </div>
               );
             })
-          ) : (
-            <div className="text-center py-12 bg-white rounded-2xl border border-[#E9E2D7] p-8">
-              <p className="text-sm text-[#5C6762]">
-                Nenhuma resposta encontrada para &quot;{search}&quot;.
-              </p>
-              <button
-                type="button"
-                onClick={() => setSearch('')}
-                className="mt-3 text-xs font-bold text-[#E0631B] underline cursor-pointer"
-              >
-                Limpar busca
-              </button>
-            </div>
           )}
         </div>
 
-        {/* Still have questions? Help Card */}
-        <div className="bg-[#FAF8F5] border-2 border-dashed border-[#E9E2D7] rounded-3xl p-8 text-center space-y-4">
-          <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0B2F21]">
-            Não encontrou o que procurava?
-          </h3>
-          <p className="text-sm text-[#5C6762] max-w-md mx-auto">
-            Nossa equipe está disponível no WhatsApp para responder sua dúvida específica em poucos minutos.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <a
-              href={whatsappDoubtUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider shadow transition-colors"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>Tirar Dúvida no WhatsApp</span>
-            </a>
-            <Link
-              href="/monte-seu-evento"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0B2F21] hover:bg-[#124330] text-white font-bold text-xs uppercase tracking-wider shadow transition-colors"
-            >
-              <CalendarClock className="w-4 h-4 text-[#E0631B]" />
-              <span>Simular Meu Evento</span>
-            </Link>
+        {/* WhatsApp Help Box */}
+        <div className="p-8 sm:p-12 rounded-3xl bg-white border border-[#E5DFD5] flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div>
+            <h3 className="font-serif text-2xl font-normal text-[#071E15] mb-2">
+              Sua dúvida não está listada?
+            </h3>
+            <p className="text-xs sm:text-sm text-[#55635C] font-light">
+              Nossa equipe está disponível para responder perguntas sobre o seu evento diretamente no chat.
+            </p>
           </div>
+
+          <a
+            href={whatsappDoubtUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-[#071E15] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#124330] transition-colors shrink-0"
+          >
+            <MessageCircle className="w-4 h-4 text-emerald-400" />
+            <span>Falar com especialista</span>
+          </a>
         </div>
       </div>
     </div>

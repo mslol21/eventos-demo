@@ -1,95 +1,82 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
-const STEPS = [
-  {
-    step: '01',
-    title: 'Escolha seu buffet',
-    description: 'Churrasco com cortes nobres, Coquetel com Finger Foods, Festival de Massas ou ilhas personalizadas.',
-  },
-  {
-    step: '02',
-    title: 'Informe os detalhes',
-    description: 'Data aproximada, horário de início, quantidade de convidados e o bairro onde será a comemoração.',
-  },
-  {
-    step: '03',
-    title: 'Personalize com adicionais',
-    description: 'Adicione bebidas geladas, sobremesas artesanais, choppeira, garçons extras ou louças completas.',
-  },
-  {
-    step: '04',
-    title: 'Receba a estimativa',
-    description: 'Veja um resumo organizado e uma estimativa calculada em tempo real com total transparência.',
-  },
-  {
-    step: '05',
-    title: 'Finalize pelo WhatsApp',
-    description: 'Envie todas as informações organizadas para nossa equipe validar a data e confirmar os detalhes.',
-  },
+const CONCIERGE_STEPS = [
+  { num: '01', title: 'Ocasião', desc: 'Aniversário, casamento ou confraternização' },
+  { num: '02', title: 'Cardápio', desc: 'Churrasco, Finger Foods ou Massas' },
+  { num: '03', title: 'Convidados', desc: 'Quantidade exata para sua festa' },
+  { num: '04', title: 'Data & Hora', desc: 'Previsão de calendário e montagem' },
+  { num: '05', title: 'Local', desc: 'São Paulo, ABC e Região Metropolitana' },
+  { num: '06', title: 'Opcionais', desc: 'Chopp, sobremesas ou louças sob consulta' },
+  { num: '07', title: 'Resumo & WhatsApp', desc: 'Estimativa transparente enviada em 1 clique' },
 ];
 
 export function HowItWorks() {
   return (
-    <section className="py-20 sm:py-28 bg-[#F3EFE9] border-y border-[#E9E2D7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#E0631B] font-bold mb-2">
-            Simples, Rápido e Sem Burocracia
-          </p>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0B2F21] tracking-tight mb-4">
-            Organizar seu evento ficou mais fácil.
+    <section className="bg-[#071E15] text-white py-24 sm:py-36 relative overflow-hidden">
+      {/* Delicate Ambient Glow */}
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#C8521A]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-[#C5A059]/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+        {/* Striking Visual Transition Headline */}
+        <div className="max-w-3xl mb-16 sm:mb-24">
+          <div className="flex items-center gap-2.5 text-xs uppercase tracking-[0.25em] text-[#C5A059] font-medium mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-[#E0631B]" />
+            <span>SIMULADOR DIGITAL • EXPERIÊNCIA TRANSPARENTE</span>
+          </div>
+
+          <h2 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-normal leading-[0.95] tracking-[-0.03em] mb-6">
+            Agora vamos falar sobre a sua festa.
           </h2>
-          <p className="text-base sm:text-lg text-[#5C6762] leading-relaxed">
-            Nada de formulários intermináveis ou dias esperando por uma resposta. Você simula no seu ritmo e recebe uma proposta pronta.
+
+          <p className="text-sm sm:text-base lg:text-lg text-[#FAF8F5]/80 font-light leading-relaxed max-w-2xl">
+            Sem dias de espera ou perguntas repetitivas no chat. Escolha seu buffet, informe os convidados e veja o cálculo inicial pronto para validação da equipe.
           </p>
         </div>
 
-        {/* 5-Step Process Timeline */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-6 relative">
-          {STEPS.map((item, idx) => {
-            return (
-              <div
-                key={item.step}
-                className="relative flex flex-col justify-between p-6 rounded-2xl bg-white/70 border border-[#E9E2D7]/80 hover:bg-white transition-colors duration-200"
-              >
-                <div>
-                  {/* Step Numeral */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-serif text-2xl font-bold text-[#C5A059] tracking-wider">
-                      {item.step}
-                    </span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E0631B]" />
-                  </div>
-
-                  <h3 className="font-serif text-lg font-bold text-[#0B2F21] mb-2 leading-snug">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[#5C6762] leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-
-                {idx < STEPS.length - 1 && (
-                  <div className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 z-10 text-[#C5A059]/40">
-                    →
-                  </div>
-                )}
+        {/* Elegant Minimalist Flow Timeline */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 mb-16">
+          {CONCIERGE_STEPS.map((step) => (
+            <div
+              key={step.num}
+              className="p-5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#C5A059]/40 hover:bg-white/[0.07] transition-all duration-200 flex flex-col justify-between"
+            >
+              <span className="font-mono text-xs text-[#C5A059] font-bold mb-3 block">
+                {step.num}
+              </span>
+              <div>
+                <h3 className="font-serif text-base sm:text-lg font-medium text-white mb-1">
+                  {step.title}
+                </h3>
+                <p className="text-[11px] text-[#FAF8F5]/60 font-light leading-snug">
+                  {step.desc}
+                </p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
-        {/* Bottom CTA to Action */}
-        <div className="mt-14 text-center">
+        {/* High-Impact Centered Gateway CTA */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-8 sm:p-12 rounded-3xl bg-white/[0.03] border border-white/10">
+          <div>
+            <h3 className="font-serif text-2xl sm:text-3xl font-normal mb-2 text-white">
+              Pronto para montar o seu orçamento?
+            </h3>
+            <p className="text-xs sm:text-sm text-[#FAF8F5]/70 font-light">
+              Leva menos de 2 minutos e não exige cadastro demorado.
+            </p>
+          </div>
+
           <Link
             href="/monte-seu-evento"
-            className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#0B2F21] text-white hover:bg-[#124330] shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2F21]"
+            className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-[#E0631B] text-white text-xs sm:text-sm font-semibold uppercase tracking-wider hover:bg-[#C44E0F] transition-all duration-200 active:scale-[0.98] shadow-xl shrink-0"
           >
-            <span>Experimente o simulador agora</span>
-            <ArrowRight className="w-4 h-4 text-[#E0631B]" />
+            <span>Iniciar simulador do evento</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

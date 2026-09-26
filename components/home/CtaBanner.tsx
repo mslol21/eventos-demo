@@ -1,49 +1,50 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { CalendarClock, MessageCircle, Sparkles } from 'lucide-react';
+import { ArrowRight, MessageCircle } from 'lucide-react';
 import { COMPANY_CONFIG } from '@/data/company';
 
 export function CtaBanner() {
   const whatsappUrl = `https://wa.me/${COMPANY_CONFIG.whatsapp}?text=${encodeURIComponent(
-    'Olá! Quero tirar dúvidas e receber um orçamento para o meu evento com a SD Eventos.'
+    'Olá! Gostaria de conversar com a equipe da SD Eventos sobre buffet a domicílio para meu evento.'
   )}`;
 
   return (
-    <section className="py-20 bg-[#0B2F21] text-white relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#E0631B_1px,transparent_1px)] [background-size:16px_16px]" />
+    <section className="bg-[#071E15] text-white py-24 sm:py-36 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+          <div className="lg:col-span-8">
+            <span className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-[#C5A059] font-medium block mb-4">
+              SD EVENTOS • BUFFET A DOMICÍLIO
+            </span>
+            <h2 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-normal leading-[1.05] tracking-[-0.02em] mb-6">
+              Pronto para viver uma experiência gastronômica inesquecível?
+            </h2>
+            <p className="text-sm sm:text-base lg:text-lg text-[#FAF8F5]/80 font-light leading-relaxed max-w-2xl">
+              Simule os detalhes do seu buffet em tempo real ou chame nossa equipe diretamente para tirar dúvidas e verificar datas disponíveis.
+            </p>
+          </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#17523C] text-[#C5A059] text-xs font-semibold uppercase tracking-wider mb-6">
-          <Sparkles className="w-3.5 h-3.5 text-[#E0631B]" />
-          <span>Transforme sua comemoração</span>
-        </div>
+          <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-4">
+            <Link
+              href="/monte-seu-evento"
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-[#E0631B] text-white text-xs sm:text-sm font-semibold uppercase tracking-wider hover:bg-[#C44E0F] transition-all active:scale-[0.98] shadow-xl text-center"
+            >
+              <span>Monte seu evento online</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
 
-        <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6 max-w-3xl mx-auto">
-          Pronto para viver uma experiência gastronômica inesquecível?
-        </h2>
-
-        <p className="text-base sm:text-lg text-[#E9E2D7]/90 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-          Simule os detalhes do seu buffet agora mesmo ou chame nossa equipe para tirar qualquer dúvida. Garantimos pontualidade, fartura e sabor.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href="/monte-seu-evento"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] shadow-lg hover:shadow-xl transition-all"
-          >
-            <CalendarClock className="w-4 h-4" />
-            <span>Monte seu Evento Agora</span>
-          </Link>
-
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-sm font-semibold border border-[#1E694D] bg-[#124330] text-white hover:bg-[#17523C] transition-all"
-          >
-            <MessageCircle className="w-4 h-4 text-emerald-400" />
-            <span>Conversar no WhatsApp</span>
-          </a>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/20 bg-white/[0.04] text-white text-xs sm:text-sm font-medium tracking-wide hover:bg-white/10 hover:border-white/40 transition-all active:scale-[0.98] text-center"
+            >
+              <MessageCircle className="w-4 h-4 text-emerald-400" />
+              <span>Falar no WhatsApp</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>

@@ -1,113 +1,85 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CalendarClock, MessageCircle, ShieldCheck, Flame, GlassWater, Utensils, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { COMPANY_CONFIG } from '@/data/company';
 
 export function HeroSection() {
   const whatsappUrl = `https://wa.me/${COMPANY_CONFIG.whatsapp}?text=${encodeURIComponent(
-    COMPANY_CONFIG.defaultMessageTemplate
+    'Olá! Gostaria de conversar com a SD Eventos sobre buffet para meu evento.'
   )}`;
 
   return (
-    <section className="relative min-h-[90vh] lg:min-h-[92vh] flex items-center justify-center bg-[#072017] text-white overflow-hidden">
-      {/* Background Gastronomic Image with Warm Vignette & Overlay */}
-      <div className="absolute inset-0 z-0 select-none pointer-events-none">
+    <section className="relative min-h-[92vh] sm:min-h-screen flex items-end sm:items-center bg-[#071E15] text-white overflow-hidden pb-16 sm:pb-0">
+      {/* Edge-to-Edge Dominant Gastronomy Photograph */}
+      <div className="absolute inset-0 z-0 select-none">
         <Image
-          src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=2000&q=85"
-          alt="Mesa de buffet gastronômico requintado preparado pela SD Eventos"
+          src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=2400&q=90"
+          alt="Gastronomia refinada e mesa de buffet preparada pela SD Eventos"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-25 scale-105"
+          className="object-cover object-center scale-[1.02] transform transition-transform duration-1000 ease-out"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#072017]/95 via-[#0B2F21]/80 to-[#072017]" />
+        {/* Controlled Luxury Cinematic Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-[#071E15]/95 via-[#071E15]/70 to-[#071E15]/30 sm:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[#071E15]/80" />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 text-center flex flex-col items-center">
-        {/* Editorial Sub-header Badge */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#124330]/80 border border-[#C5A059]/40 text-[#E9E2D7] text-xs tracking-wider uppercase font-semibold mb-6 backdrop-blur-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#E0631B]" />
-          <span>Buffet a Domicílio • São Paulo & Região</span>
+      {/* Editorial Content Container */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-28 sm:pt-36 lg:pt-40">
+        <div className="max-w-3xl lg:max-w-4xl">
+          {/* Subtle Brand Origin Line */}
+          <div className="flex items-center gap-3 mb-6 sm:mb-8 text-[11px] sm:text-xs uppercase tracking-[0.28em] text-[#C5A059] font-medium">
+            <span className="w-6 sm:w-8 h-px bg-[#C5A059]" />
+            <span>SD EVENTOS • BUFFET A DOMICÍLIO</span>
+          </div>
+
+          {/* Monumental Editorial Headline */}
+          <h1 className="font-serif text-[2.75rem] leading-[0.92] sm:text-6xl md:text-7xl lg:text-[5.75rem] xl:text-[6.75rem] font-normal tracking-[-0.03em] text-white mb-6 sm:mb-8">
+            SABORES QUE<br />
+            <span className="italic font-light text-[#FAF8F5]/90">ENCANTAM.</span><br />
+            MOMENTOS<br />
+            <span className="italic font-light text-[#E0631B]">QUE FICAM.</span>
+          </h1>
+
+          {/* Subtitle with High Legibility & Restraint */}
+          <p className="text-sm sm:text-base lg:text-lg text-[#FAF8F5]/85 font-light leading-relaxed max-w-xl mb-8 sm:mb-10">
+            Churrasco nobre na brasa, finger foods contemporâneos e massas artesanais preparados com excelência e hospitalidade onde você comemorar.
+          </p>
+
+          {/* Actions: Evident Primary + Discrete Secondary */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-8 pt-2">
+            <Link
+              href="/monte-seu-evento"
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-[#E0631B] text-white text-xs sm:text-sm font-semibold uppercase tracking-wider hover:bg-[#C44E0F] transition-all duration-200 active:scale-[0.98] shadow-xl hover:shadow-2xl"
+            >
+              <span>Monte seu evento</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 text-xs sm:text-sm text-[#FAF8F5]/80 hover:text-white underline underline-offset-8 decoration-white/30 hover:decoration-white transition-all tracking-wider uppercase font-medium py-2 sm:py-0"
+            >
+              <span>Fale no WhatsApp</span>
+              <span className="text-xs">→</span>
+            </a>
+          </div>
         </div>
 
-        {/* Brand Name */}
-        <p className="text-xs sm:text-sm uppercase tracking-[0.3em] font-semibold text-[#E0631B] mb-3">
-          SD EVENTOS
-        </p>
-
-        {/* Primary Headline with Editorial Typography */}
-        <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.15] mb-6 max-w-4xl">
-          SABORES QUE ENCANTAM.
-          <br />
-          <span className="text-[#FAF8F5] italic font-normal font-serif">
-            MOMENTOS QUE FICAM.
-          </span>
-        </h1>
-
-        {/* Elegant Gold Accent Line */}
-        <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent mb-6" />
-
-        {/* Subtitle */}
-        <p className="text-base sm:text-lg lg:text-xl text-[#FAF8F5]/90 max-w-2xl font-light leading-relaxed mb-8">
-          Buffet a domicílio para transformar sua comemoração em uma experiência especial. Cardápios completos preparados com excelência no local do seu evento.
-        </p>
-
-        {/* Gastronomic Specialty Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 text-xs text-[#E9E2D7]/90">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-xs">
-            <Flame className="w-3.5 h-3.5 text-[#E0631B]" />
-            Churrasco Nobre na Brasa
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-xs">
-            <GlassWater className="w-3.5 h-3.5 text-[#E0631B]" />
-            Finger Foods & Coquetéis
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-xs">
-            <Utensils className="w-3.5 h-3.5 text-[#E0631B]" />
-            Festival de Massas Artesanais
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-xs">
-            <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
-            Ilhas Gastronômicas
-          </span>
-        </div>
-
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-12">
-          <Link
-            href="/monte-seu-evento"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] shadow-lg hover:shadow-xl transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0631B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#072017]"
-          >
-            <CalendarClock className="w-4 h-4" />
-            <span>Monte seu Evento</span>
-          </Link>
-
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-sm font-semibold border border-[#17523C] bg-[#0B2F21]/80 text-white hover:bg-[#124330] hover:border-[#1E694D] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#072017]"
-          >
-            <MessageCircle className="w-4 h-4 text-emerald-400" />
-            <span>Fale pelo WhatsApp</span>
-          </a>
-        </div>
-
-        {/* Trust Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 pt-6 border-t border-[#17523C]/50 w-full max-w-2xl text-xs text-[#E9E2D7]/80">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#C5A059] shrink-0" />
-            <span>Equipe técnica uniformizada</span>
+        {/* Quiet Editorial Footnote (Desktop) */}
+        <div className="hidden lg:flex items-center justify-between border-t border-white/10 mt-20 pt-6 pb-8 text-[11px] uppercase tracking-[0.2em] text-[#FAF8F5]/60">
+          <div className="flex items-center gap-8">
+            <span>São Paulo & Região Metropolitana</span>
+            <span>•</span>
+            <span>Alimentação, equipe e descartáveis inclusos</span>
           </div>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#C5A059] shrink-0" />
-            <span>Estrutura completa a domicílio</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#C5A059] shrink-0" />
-            <span>Estimativa inicial transparente</span>
-          </div>
+          <span className="font-mono text-[10px] text-[#C5A059]">@sdservicoseeventos</span>
         </div>
       </div>
     </section>

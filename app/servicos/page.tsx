@@ -1,41 +1,39 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Metadata } from 'next';
-import { Check, X, Info, CalendarClock, Sparkles, Users, Clock, AlertCircle } from 'lucide-react';
+import type { Metadata } from 'next';
+import { Check, ArrowRight } from 'lucide-react';
 import { SERVICES_DATA } from '@/data/services';
-import { ADDONS_DATA } from '@/data/addons';
 
 export const metadata: Metadata = {
-  title: 'Buffets e Cardápios Exclusivos',
+  title: 'Cardápios & Buffets a Domicílio',
   description:
-    'Conheça nossos cardápios completos para buffet a domicílio: Churrasco Nobre, Finger Foods & Coquetéis, Festival de Massas Artesanais e Menus Personalizados.',
+    'Cardápios completos para festas e eventos em São Paulo: Churrasco na Brasa, Finger Foods & Coquetéis e Festival de Massas Artesanais com alimentação, equipe e descartáveis inclusos.',
 };
 
 export default function ServicosPage() {
   return (
-    <div className="py-12 sm:py-20 bg-[#FAF8F5]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF7F2] text-[#1E694D] text-xs font-bold uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-[#E0631B]" />
-            <span>Cardápios Completos & Transparentes</span>
-          </div>
-          <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#0B2F21] tracking-tight mb-4">
-            Nossos Buffets a Domicílio
+    <div className="py-16 sm:py-28 bg-[#FAF7F2] text-[#121815]">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+        {/* Editorial Page Header */}
+        <div className="max-w-3xl mb-16 sm:mb-24">
+          <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-[#C8521A] font-bold mb-3">
+            GASTRONOMIA A DOMICÍLIO • SÃO PAULO & REGIÃO
+          </p>
+          <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-normal leading-[0.95] tracking-[-0.03em] text-[#071E15] mb-6">
+            Nossos Cardápios & Buffets.
           </h1>
-          <p className="text-base sm:text-lg text-[#5C6762] leading-relaxed">
-            Estrutura profissional, ingredientes selecionados e preparo ao vivo. Entenda detalhadamente o que está incluso em cada experiência.
+          <p className="text-base sm:text-lg text-[#55635C] font-light leading-relaxed">
+            Estrutura profissional, ingredientes de alta qualidade e serviço atencioso. Conforme divulgação oficial da SD Eventos, todos os pacotes incluem alimentação completa, bebidas não alcoólicas, equipe e descartáveis.
           </p>
 
           {/* Quick jump anchor links */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-6">
+          <div className="flex flex-wrap gap-2 pt-6">
             {SERVICES_DATA.map((s) => (
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="px-4 py-2 rounded-full text-xs font-semibold bg-white border border-[#E9E2D7] text-[#0B2F21] hover:border-[#E0631B] hover:text-[#E0631B] transition-all shadow-xs"
+                className="px-4 py-2 rounded-full text-xs font-semibold bg-white border border-[#E5DFD5] text-[#071E15] hover:border-[#C8521A] hover:text-[#C8521A] transition-colors shadow-xs"
               >
                 {s.name}
               </a>
@@ -43,213 +41,120 @@ export default function ServicosPage() {
           </div>
         </div>
 
-        {/* Global Demo Note Banner */}
-        <div className="mb-12 p-4 rounded-2xl bg-[#FFF6F0] border border-[#FFE6D6] flex items-start gap-3 max-w-4xl mx-auto">
-          <Info className="w-5 h-5 text-[#E0631B] shrink-0 mt-0.5" />
-          <div className="text-xs sm:text-sm text-[#5C6762]">
-            <p className="font-semibold text-[#0B2F21]">
-              Transparência na contratação:
-            </p>
-            <p>
-              Os valores apresentados abaixo são demonstrativos e servem como referência para pacotes padrão de até 50 pessoas. No simulador você personaliza o número exato de convidados e adicionais para obter sua estimativa em tempo real.
-            </p>
-          </div>
-        </div>
-
-        {/* Detailed Services List */}
-        <div className="space-y-16">
+        {/* Detailed Editorial Service Showcase */}
+        <div className="space-y-24 sm:space-y-36">
           {SERVICES_DATA.map((service, index) => {
             const isReversed = index % 2 !== 0;
 
             return (
-              <section
+              <article
                 key={service.id}
                 id={service.id}
-                className="scroll-mt-28 bg-white rounded-3xl border border-[#E9E2D7] overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                className="scroll-mt-28 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start pb-20 border-b border-[#E5DFD5] last:border-b-0"
               >
-                {/* Hero / Main Header Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
-                  {/* Service Image & Mini Gallery */}
-                  <div className={`lg:col-span-6 relative flex flex-col ${isReversed ? 'lg:order-2' : ''}`}>
-                    <div className="relative h-72 sm:h-96 w-full overflow-hidden bg-gray-100">
-                      <Image
-                        src={service.heroImage}
-                        alt={`Buffet ${service.name}`}
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                        className="object-cover"
-                      />
-                      {service.badge && (
-                        <span className="absolute top-4 left-4 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#0B2F21]/95 text-white border border-[#C5A059]/40 backdrop-blur-sm">
-                          {service.badge}
-                        </span>
-                      )}
-                    </div>
+                {/* Visual Imagery Column (6 cols) */}
+                <div className={`lg:col-span-6 ${isReversed ? 'lg:order-2' : 'lg:order-1'}`}>
+                  <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl bg-stone-200 mb-3">
+                    <Image
+                      src={service.heroImage}
+                      alt={service.name}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                  </div>
 
-                    {/* Thumbnail Gallery */}
-                    <div className="grid grid-cols-4 gap-2 p-3 bg-[#FAF8F5] border-t border-[#E9E2D7]">
+                  {/* Thumbnail gallery */}
+                  {service.gallery && service.gallery.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2">
                       {service.gallery.map((thumb, idx) => (
-                        <div key={idx} className="relative h-16 sm:h-20 rounded-lg overflow-hidden bg-gray-200">
+                        <div key={idx} className="relative aspect-[4/3] rounded-lg overflow-hidden bg-stone-200">
                           <Image
                             src={thumb}
                             alt={`${service.name} detalhe ${idx + 1}`}
                             fill
-                            sizes="(max-width: 768px) 25vw, 12vw"
-                            className="object-cover hover:scale-110 transition-transform duration-300"
+                            sizes="20vw"
+                            className="object-cover hover:scale-105 transition-transform"
                           />
                         </div>
                       ))}
                     </div>
-                  </div>
-
-                  {/* Summary & Details */}
-                  <div className={`lg:col-span-6 p-6 sm:p-10 flex flex-col justify-between ${isReversed ? 'lg:order-1' : ''}`}>
-                    <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#E0631B]">
-                        {service.tagline}
-                      </span>
-                      <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0B2F21] mt-1 mb-3">
-                        {service.name}
-                      </h2>
-                      <p className="text-sm sm:text-base text-[#5C6762] leading-relaxed mb-6">
-                        {service.fullDescription}
-                      </p>
-
-                      {/* Guest suggestions & Timing */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 p-4 rounded-xl bg-[#FAF8F5] border border-[#E9E2D7]">
-                        <div className="flex items-center gap-2.5 text-xs sm:text-sm text-[#0B2F21]">
-                          <Users className="w-4 h-4 text-[#E0631B] shrink-0" />
-                          <span>{service.suggestedGuests}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5 text-xs sm:text-sm text-[#0B2F21]">
-                          <Clock className="w-4 h-4 text-[#E0631B] shrink-0" />
-                          <span>4h a 4h30 de serviço contínuo</span>
-                        </div>
-                      </div>
-
-                      {/* Pricing Highlight Box */}
-                      {service.basePriceCash ? (
-                        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#FFF6F0] to-[#FAF8F5] border border-[#FFE6D6] mb-6">
-                          <p className="text-xs text-[#C44E0F] font-bold uppercase tracking-wider mb-1">
-                            Pacote Promocional Demonstrativo (até 50 convidados)
-                          </p>
-                          <div className="flex flex-wrap items-baseline gap-2">
-                            <span className="text-2xl sm:text-3xl font-serif font-extrabold text-[#0B2F21]">
-                              10x de R$ {service.basePriceInstallments}
-                            </span>
-                            <span className="text-sm text-[#5C6762]">
-                              ou <strong className="text-[#0B2F21]">R$ {service.basePriceCash?.toLocaleString('pt-BR')}</strong> à vista
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-[#5C6762] mt-1 italic">
-                            * Valores demonstrativos sujeitos à confirmação.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E9E2D7] mb-6">
-                          <p className="text-sm font-semibold text-[#0B2F21]">
-                            Orçamento Sob Medida
-                          </p>
-                          <p className="text-xs text-[#5C6762] mt-0.5">
-                            Formulação de menu e custos conforme formato e preferências do anfitrião.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* CTA Button */}
-                    <div>
-                      <Link
-                        href={`/monte-seu-evento?servico=${service.id}`}
-                        className="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] shadow hover:shadow-lg transition-all duration-200"
-                      >
-                        <CalendarClock className="w-4 h-4" />
-                        <span>Montar meu evento com este buffet</span>
-                      </Link>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
-                {/* Tabs / Accordion of What's Included, Not Included, and Observations */}
-                <div className="border-t border-[#E9E2D7] p-6 sm:p-10 bg-[#FCFBF9]">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                    {/* What is Included */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-800">
-                          <Check className="w-4 h-4" />
-                        </div>
-                        <h3 className="font-serif text-lg font-bold text-[#0B2F21]">
-                          O que está incluso
-                        </h3>
-                      </div>
-                      <ul className="space-y-2.5 text-xs sm:text-sm text-[#5C6762]">
-                        {service.includedItems.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-2.5">
-                            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* What is Not Included */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center text-amber-800">
-                          <X className="w-4 h-4" />
-                        </div>
-                        <h3 className="font-serif text-lg font-bold text-[#0B2F21]">
-                          O que não está incluso (disponível à parte)
-                        </h3>
-                      </div>
-                      <ul className="space-y-2.5 text-xs sm:text-sm text-[#5C6762]">
-                        {service.notIncludedItems.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-2.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-2" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      {/* Observations note */}
-                      <div className="pt-4 mt-4 border-t border-[#E9E2D7]">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B2F21] mb-2 flex items-center gap-1.5">
-                          <AlertCircle className="w-3.5 h-3.5 text-[#C5A059]" />
-                          <span>Observações de atendimento</span>
-                        </h4>
-                        <ul className="space-y-1.5 text-xs text-[#5C6762]">
-                          {service.observations.map((obs, idx) => (
-                            <li key={idx}>• {obs}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Available Addons Pills */}
-                  <div className="mt-8 pt-6 border-t border-[#E9E2D7]">
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#0B2F21] mb-3">
-                      Adicionais disponíveis para este buffet:
+                {/* Content & Details Column (6 cols) */}
+                <div className={`lg:col-span-6 space-y-6 ${isReversed ? 'lg:order-1' : 'lg:order-2'}`}>
+                  <div>
+                    <span className="font-mono text-xs uppercase tracking-widest text-[#C8521A] font-bold block mb-2">
+                      PACOTE OFICIAL {index + 1 < 10 ? `0${index + 1}` : index + 1}
+                    </span>
+                    <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-[#071E15] tracking-tight leading-tight">
+                      {service.name}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-[#8B7355] uppercase tracking-wider font-semibold mt-1">
+                      {service.tagline}
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {service.availableAddons.map((addonId) => {
-                        const addon = ADDONS_DATA.find((a) => a.id === addonId);
-                        if (!addon) return null;
-                        return (
-                          <span
-                            key={addon.id}
-                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs bg-white border border-[#E9E2D7] text-[#0B2F21]"
-                          >
-                            <span className="text-[#E0631B] font-bold">+</span>
-                            <span>{addon.name}</span>
-                          </span>
-                        );
-                      })}
+                  </div>
+
+                  <p className="text-sm sm:text-base text-[#55635C] font-light leading-relaxed">
+                    {service.fullDescription}
+                  </p>
+
+                  {/* Official Promo Highlight */}
+                  {service.basePriceCash && (
+                    <div className="p-5 rounded-2xl bg-white border border-[#E5DFD5] shadow-xs">
+                      <p className="text-[11px] uppercase tracking-wider text-[#C8521A] font-semibold mb-1">
+                        Promoção Divulgada (Até 50 convidados)
+                      </p>
+                      <div className="flex flex-wrap items-baseline gap-2 mb-1">
+                        <span className="font-serif text-3xl font-semibold text-[#071E15]">
+                          10x de R$ {service.basePriceInstallments}
+                        </span>
+                        <span className="text-sm text-[#55635C]">
+                          ou R$ {service.basePriceCash.toLocaleString('pt-BR')} à vista
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#7A8A82] italic">
+                        * Valores demonstrativos sujeitos à confirmação conforme data, local e necessidades adicionais.
+                      </p>
                     </div>
+                  )}
+
+                  {/* Included list */}
+                  <div className="p-5 rounded-2xl bg-stone-50 border border-[#E5DFD5] space-y-3">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[#071E15]">
+                      O que está incluso no pacote:
+                    </h3>
+                    <ul className="space-y-2 text-xs text-[#55635C]">
+                      {service.includedItems.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                          <Check className="w-3.5 h-3.5 text-[#C8521A] shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <Link
+                      href={`/monte-seu-evento?service=${service.id}`}
+                      className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#071E15] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#124330] transition-colors active:scale-[0.98] shadow-md"
+                    >
+                      <span>Simular este buffet</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+
+                    <Link
+                      href="/contato"
+                      className="inline-flex items-center justify-center px-4 py-3 text-xs font-medium text-[#55635C] hover:text-[#071E15] underline underline-offset-4 decoration-[#E5DFD5] hover:decoration-[#071E15] transition-colors"
+                    >
+                      <span>Tirar dúvidas com a equipe</span>
+                    </Link>
                   </div>
                 </div>
-              </section>
+              </article>
             );
           })}
         </div>

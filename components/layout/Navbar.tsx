@@ -3,13 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, UtensilsCrossed, CalendarClock, MessageCircle } from 'lucide-react';
+import { Menu, X, ArrowRight, MessageCircle } from 'lucide-react';
 import { COMPANY_CONFIG } from '@/data/company';
 
 const NAV_LINKS = [
   { href: '/', label: 'Início' },
-  { href: '/servicos', label: 'Buffets' },
-  { href: '/monte-seu-evento', label: 'Monte seu Evento' },
+  { href: '/servicos', label: 'Cardápios' },
+  { href: '/monte-seu-evento', label: 'Simulador' },
   { href: '/galeria', label: 'Galeria' },
   { href: '/sobre', label: 'Sobre' },
   { href: '/duvidas', label: 'Dúvidas' },
@@ -31,101 +31,98 @@ export function Navbar() {
 
   const closeDrawer = () => setIsOpen(false);
 
-  // Don't show public navbar on admin pages to keep admin clean
   if (pathname.startsWith('/admin')) {
     return null;
   }
+
+  const isHeroPage = pathname === '/';
 
   return (
     <header
       className={`sticky top-0 z-40 w-full transition-all duration-300 ${
         scrolled
-          ? 'bg-[#0B2F21]/95 backdrop-blur-md shadow-lg border-b border-[#17523C]'
-          : 'bg-[#0B2F21] text-white border-b border-[#124330]'
+          ? 'bg-[#071E15]/95 backdrop-blur-md shadow-lg border-b border-white/10 py-3.5'
+          : isHeroPage
+          ? 'bg-[#071E15]/80 backdrop-blur-sm text-white border-b border-white/10 py-4 sm:py-5'
+          : 'bg-[#071E15] text-white border-b border-white/10 py-4 sm:py-5'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Brand Logo */}
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+        <div className="flex items-center justify-between">
+          {/* Typographic Luxury Brand Mark */}
           <Link
             href="/"
             onClick={closeDrawer}
-            className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#E0631B] rounded-lg p-1"
+            className="flex items-center gap-3.5 group focus:outline-none"
           >
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E0631B] to-[#C44E0F] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-              <UtensilsCrossed className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-full border border-[#C5A059]/60 flex items-center justify-center font-serif text-lg text-[#C5A059] group-hover:border-[#E0631B] group-hover:text-[#E0631B] transition-colors">
+              SD
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-serif text-xl sm:text-2xl font-bold tracking-wider text-white">
-                  SD EVENTOS
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E0631B]" />
-              </div>
-              <span className="text-[10px] sm:text-xs text-[#E9E2D7] font-medium tracking-widest uppercase">
+              <span className="font-serif text-xl sm:text-2xl font-normal tracking-[0.08em] text-white">
+                SD EVENTOS
+              </span>
+              <span className="text-[9px] sm:text-[10px] text-[#C5A059] uppercase tracking-[0.25em] font-medium -mt-1">
                 Buffet a Domicílio
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav Items */}
-          <nav className="hidden lg:flex items-center gap-7">
+          <nav className="hidden lg:flex items-center gap-8">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors relative py-1 hover:text-[#E0631B] ${
-                    isActive ? 'text-[#E0631B] font-semibold' : 'text-[#FAF8F5]/90'
+                  className={`text-xs uppercase tracking-[0.18em] font-medium transition-colors relative py-1 hover:text-[#E0631B] ${
+                    isActive ? 'text-[#E0631B]' : 'text-white/80'
                   }`}
                 >
                   {link.label}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#E0631B] rounded-full" />
+                    <span className="absolute bottom-0 left-0 right-0 h-px bg-[#E0631B]" />
                   )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Desktop CTA Action */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Action CTAs */}
+          <div className="hidden sm:flex items-center gap-4">
             <Link
               href="/monte-seu-evento"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs uppercase tracking-wider font-bold bg-[#E0631B] text-white hover:bg-[#C44E0F] active:scale-95 transition-all shadow-md hover:shadow-lg"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] transition-all duration-200 active:scale-[0.98] shadow-md"
             >
-              <CalendarClock className="w-4 h-4" />
-              <span>Pedir Orçamento</span>
+              <span>Monte seu evento</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex lg:hidden items-center gap-2">
+          <div className="flex items-center gap-2 lg:hidden">
             <Link
               href="/monte-seu-evento"
-              onClick={closeDrawer}
-              className="px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold bg-[#E0631B] text-white hover:bg-[#C44E0F] transition-all"
+              className="px-3.5 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[#E0631B] text-white hover:bg-[#C44E0F] transition-all"
             >
-              Orçamento
+              Simular
             </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              type="button"
-              className="p-2 rounded-lg text-white hover:bg-[#124330] focus:outline-none focus:ring-2 focus:ring-[#E0631B]"
-              aria-label={isOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
-              aria-expanded={isOpen}
+              aria-label={isOpen ? 'Fechar menu' : 'Abrir menu de navegação'}
+              className="p-2 text-white/90 hover:text-white rounded-lg focus:outline-none"
             >
-              {isOpen ? <X className="w-6 h-6 text-[#E0631B]" /> : <Menu className="w-6 h-6" />}
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Drawer */}
       {isOpen && (
-        <div className="lg:hidden border-t border-[#17523C] bg-[#0B2F21] px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-in slide-in-from-top duration-200">
-          <div className="flex flex-col space-y-1">
+        <div className="lg:hidden bg-[#071E15] border-b border-white/10 px-5 pt-4 pb-8 space-y-4 animate-in slide-in-from-top-2 duration-200">
+          <nav className="flex flex-col space-y-3">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -133,39 +130,25 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={closeDrawer}
-                  className={`px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-                    isActive
-                      ? 'bg-[#17523C] text-[#E0631B] font-semibold'
-                      : 'text-white hover:bg-[#124330] hover:text-[#FAF8F5]'
+                  className={`text-sm uppercase tracking-widest py-2 border-b border-white/5 transition-colors ${
+                    isActive ? 'text-[#E0631B] font-semibold' : 'text-white/80'
                   }`}
                 >
                   {link.label}
                 </Link>
               );
             })}
-          </div>
+          </nav>
 
-          <div className="pt-4 mt-3 border-t border-[#17523C] space-y-3">
-            <Link
-              href="/monte-seu-evento"
-              onClick={closeDrawer}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#E0631B] text-white shadow hover:bg-[#C44E0F] active:scale-98 transition-all"
-            >
-              <CalendarClock className="w-4 h-4" />
-              <span>Monte seu Evento</span>
-            </Link>
-
+          <div className="pt-2">
             <a
-              href={`https://wa.me/${COMPANY_CONFIG.whatsapp}?text=${encodeURIComponent(
-                COMPANY_CONFIG.defaultMessageTemplate
-              )}`}
+              href={`https://wa.me/${COMPANY_CONFIG.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={closeDrawer}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium border border-[#17523C] text-[#FAF8F5] hover:bg-[#124330] transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full border border-white/20 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/5"
             >
               <MessageCircle className="w-4 h-4 text-emerald-400" />
-              <span>Fale pelo WhatsApp</span>
+              <span>WhatsApp: {COMPANY_CONFIG.whatsappFormatted}</span>
             </a>
           </div>
         </div>
