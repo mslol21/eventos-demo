@@ -63,7 +63,7 @@ async function runVisualAudit() {
         const url = `http://localhost:3000${p.path}`;
         try {
           await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
-        } catch (e) {
+        } catch {
           // If networkidle times out due to streaming, wait for load
           await page.goto(url, { waitUntil: 'load', timeout: 15000 });
         }

@@ -121,4 +121,44 @@ export interface CompanyConfig {
   serviceArea: string;
   hours: string;
   defaultMessageTemplate: string;
+  globalBannerActive?: boolean;
+  globalBannerText?: string;
+  globalBannerLink?: string;
 }
+
+export interface CampaignPromotion {
+  id: string;
+  title: string;
+  badge: string;
+  description: string;
+  discountNote?: string;
+  highlightPrice?: string;
+  targetServiceId?: string;
+  validUntil?: string;
+  showGlobalBanner: boolean;
+  bannerText?: string;
+  bannerCtaText?: string;
+  bannerLink?: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface ManualQuoteInput {
+  customerName: string;
+  phone: string;
+  email?: string;
+  eventType: EventType;
+  eventDate: string;
+  eventTime: string;
+  guestCount: number;
+  serviceId: string;
+  addons: string[];
+  city: string;
+  neighborhood: string;
+  address?: string;
+  notes?: string;
+  customPrice?: number;
+  internalNotes?: string;
+  status?: QuoteStatus;
+}
+

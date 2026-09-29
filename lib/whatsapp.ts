@@ -93,3 +93,44 @@ export function generateAdminFollowUpUrl(customerPhone: string, customerName: st
   const message = `Olá, ${customerName}! Tudo bem? Sou da equipe SD Eventos. Recebemos sua solicitação para o buffet de *${serviceName}* e gostaríamos de confirmar os detalhes do seu evento!`;
   return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`;
 }
+
+export function generateAdminQuoteProposalUrl(quote: {
+  customerName: string;
+  phone: string;
+  service: string;
+  eventType: string;
+  eventDate: string;
+  eventTime: string;
+  guestCount: number;
+  neighborhood: string;
+  city: string;
+  addons?: string[];
+  estimatedPrice: number;
+}): string {
+  const cleanPhone = quote.phone.replace(/\D/g, '');
+  const phoneWithCountry = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+  const formattedDate = quote.eventDate ? quote.eventDate.split('-').reverse().join('/') : 'A combinar';
+  const addonsText = quote.addons && quote.addons.length > 0 ? `➕ *Adicionais:* ${quote.addons.join(', ')}\n` : '';
+
+  const message = `Olá, *${quote.customerName}*! Tudo bem? Aqui é da equipe da *SD Eventos*.
+
+Preparamos a proposta para a sua celebração:
+
+🎉 *Evento:* ${quote.eventType.toUpperCase()}
+📅 *Data Prevista:* ${formattedDate} às ${quote.eventTime || '13:00'}
+👥 *Convidados:* ${quote.guestCount} pessoas
+🍽️ *Cardápio:* ${quote.service}
+📍 *Local:* ${quote.neighborhood || quote.city}
+${addonsText}💰 *Estimativa de Investimento:* R$ ${quote.estimatedPrice.toLocaleString('pt-BR')}
+
+Incluso no pacote oficial da SD Eventos:
+✅ Alimentação completa preparada no local
+✅ Bebidas não alcoólicas inclusas
+✅ Equipe profissional de atendimento
+✅ Descartáveis completos fornecidos
+
+Gostaria de confirmar a reserva da data ou tem alguma preferência sobre o cardápio?`;
+
+  return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`;
+}
+

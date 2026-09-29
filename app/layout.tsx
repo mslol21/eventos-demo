@@ -4,6 +4,7 @@ import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { FloatingWhatsApp } from '@/components/layout/FloatingWhatsApp';
+import { TopPromotionBanner } from '@/components/layout/TopPromotionBanner';
 
 const sansFont = Plus_Jakarta_Sans({
   variable: '--font-sans',
@@ -99,6 +100,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#151D19] selection:bg-[#E0631B] selection:text-white">
+        <TopPromotionBanner />
         <Navbar />
         <main className="flex-1 w-full">{children}</main>
         <Footer />
