@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Phone, Clock, Heart } from 'lucide-react';
 import { InstagramIcon } from '@/components/ui/InstagramIcon';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 
 export function Footer() {
+  const { company } = useSiteData();
   const pathname = usePathname();
 
   if (pathname.startsWith('/admin')) {
@@ -96,30 +97,30 @@ export function Footer() {
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-[#C5A059] shrink-0" />
                 <a
-                  href={`https://wa.me/${COMPANY_CONFIG.whatsapp}`}
+                  href={`https://wa.me/${company.whatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-[#E0631B] font-medium"
                 >
-                  WhatsApp: {COMPANY_CONFIG.whatsappFormatted}
+                  WhatsApp: {company.whatsappFormatted}
                 </a>
               </div>
 
               <div className="flex items-center gap-3">
                 <InstagramIcon className="w-4 h-4 text-[#C5A059] shrink-0" />
                 <a
-                  href={COMPANY_CONFIG.instagramUrl}
+                  href={company.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-[#E0631B] font-medium"
                 >
-                  {COMPANY_CONFIG.instagram}
+                  {company.instagram}
                 </a>
               </div>
 
               <div className="flex items-start gap-3">
                 <Clock className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
-                <span>{COMPANY_CONFIG.hours}</span>
+                <span>{company.hours}</span>
               </div>
             </div>
 

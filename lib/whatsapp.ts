@@ -83,8 +83,13 @@ Gostaria de confirmar disponibilidade e receber o orçamento final.`;
 
 export function buildWhatsAppUrl(message: string, phone: string = COMPANY_CONFIG.whatsapp): string {
   const cleanPhone = phone.replace(/\D/g, '');
+  const phoneWithCountry = cleanPhone.startsWith('55')
+    ? cleanPhone
+    : cleanPhone.length === 10 || cleanPhone.length === 11
+    ? `55${cleanPhone}`
+    : cleanPhone;
   const encoded = encodeURIComponent(message);
-  return `https://wa.me/${cleanPhone}?text=${encoded}`;
+  return `https://wa.me/${phoneWithCountry}?text=${encoded}`;
 }
 
 export function generateAdminFollowUpUrl(customerPhone: string, customerName: string, serviceName: string): string {

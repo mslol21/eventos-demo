@@ -117,6 +117,7 @@ export function deleteLocalQuote(quoteId: string): QuoteRequest[] {
 
 export function createManualQuote(input: ManualQuoteInput): QuoteRequest {
   const services = getLocalServices();
+  const addons = getLocalAddons();
   const serviceObj = services.find((s) => s.id === input.serviceId) || services[0];
 
   // Calculate pricing if customPrice not provided
@@ -125,7 +126,9 @@ export function createManualQuote(input: ManualQuoteInput): QuoteRequest {
     const pricingResult = calculateEstimatedPrice(
       input.serviceId,
       input.guestCount,
-      input.addons
+      input.addons,
+      services,
+      addons
     );
     calculatedPrice = pricingResult.totalEstimatedPrice;
   }

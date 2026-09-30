@@ -4,10 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 
 export function HeroSection() {
-  const whatsappUrl = `https://wa.me/${COMPANY_CONFIG.whatsapp}?text=${encodeURIComponent(
+  const { company } = useSiteData();
+  const whatsappUrl = `https://wa.me/${company.whatsapp}?text=${encodeURIComponent(
     'Olá! Gostaria de conversar com a SD Eventos sobre buffet para meu evento.'
   )}`;
 

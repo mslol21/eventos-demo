@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { MessageCircle, X } from 'lucide-react';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 
 export function FloatingWhatsApp() {
   const pathname = usePathname();
+  const { company } = useSiteData();
   const [showTooltip, setShowTooltip] = useState(false);
 
   // Hide on admin routes and wizard page where dedicated WhatsApp CTAs exist
@@ -15,7 +16,7 @@ export function FloatingWhatsApp() {
   }
 
   const defaultMsg = encodeURIComponent('Olá! Estava navegando no site da SD Eventos e gostaria de tirar uma dúvida sobre os buffets.');
-  const whatsappUrl = `https://wa.me/${COMPANY_CONFIG.whatsapp}?text=${defaultMsg}`;
+  const whatsappUrl = `https://wa.me/${company.whatsapp}?text=${defaultMsg}`;
 
   return (
     <aside

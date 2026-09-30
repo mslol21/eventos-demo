@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { InstagramIcon } from '@/components/ui/InstagramIcon';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 
 const GALLERY_SAMPLES = [
   {
@@ -27,6 +27,8 @@ const GALLERY_SAMPLES = [
 ];
 
 export function InstagramGalleryStrip() {
+  const { company } = useSiteData();
+
   return (
     <section className="py-24 sm:py-36 bg-[#FAF7F2] text-[#121815] border-t border-[#E5DFD5]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
@@ -42,13 +44,13 @@ export function InstagramGalleryStrip() {
           </div>
 
           <a
-            href={COMPANY_CONFIG.instagramUrl}
+            href={company.instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wider text-[#071E15] hover:text-[#C8521A] transition-colors self-start md:self-auto"
           >
             <InstagramIcon className="w-4 h-4 text-[#C8521A]" />
-            <span>{COMPANY_CONFIG.instagram}</span>
+            <span>{company.instagram}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </a>
         </div>

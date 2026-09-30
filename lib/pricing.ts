@@ -1,5 +1,6 @@
 import { ADDONS_DATA } from '@/data/addons';
 import { SERVICES_DATA } from '@/data/services';
+import { ServiceOption, AddonOption } from '@/types';
 
 export interface PricingCalculationResult {
   serviceBasePrice: number;
@@ -31,28 +32,21 @@ export function formatBRL(value: number): string {
 export function calculateEstimatedPrice(
   serviceId: string,
   guestCount: number,
-  selectedAddonIds: string[]
+  selectedAddonIds: string[],
+  customServices?: ServiceOption[],
+  customAddons?: AddonOption[]
 ): PricingCalculationResult {
-  const service = SERVICES_DATA.find((s) => s.id === serviceId) || SERVICES_DATA[0];
+  const servicesList = customServices && customServices.length > 0 ? customServices : SERVICES_DATA;
+  const addonsList = customAddons && customAddons.length > 0 ? customAddons : ADDONS_DATA;
+
+  const service = servicesList.find((s) => s.id === serviceId) || servicesList[0];
   const safeGuests = Math.max(guestCount || 30, 20);
 
-  // Determine base service per-person cost
-  let perPersonBase = 70; // default for churrasco
-  let standard50Base = 3500;
-
-  if (service.id === 'churrasco') {
-    standard50Base = 3500;
-    perPersonBase = 70;
-  } else if (service.id === 'finger-foods') {
-    standard50Base = 2750;
-    perPersonBase = 55;
-  } else if (service.id === 'festival-de-massas') {
-    standard50Base = 2500;
-    perPersonBase = 50;
-  } else if (service.id === 'eventos-personalizados') {
-    standard50Base = 3750;
-    perPersonBase = 75;
-  }
+  // Derive standard base for 50 people and per person rate from ServiceOption
+  const standard50Base =
+    service.basePriceCash ||
+    (service.basePriceInstallments ? service.basePriceInstallments * (service.installmentCount || 10) : 3500);
+  const perPersonBase = Math.round(standard50Base / 50);
 
   // Calculate service subtotal
   let serviceSubtotal: number;
@@ -75,7 +69,7 @@ export function calculateEstimatedPrice(
   let addonsTotal = 0;
 
   for (const addonId of selectedAddonIds) {
-    const addon = ADDONS_DATA.find((a) => a.id === addonId);
+    const addon = addonsList.find((a) => a.id === addonId);
     if (!addon) continue;
 
     let addonCost = 0;

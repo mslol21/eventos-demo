@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { ChevronDown, Search, MessageCircle } from 'lucide-react';
 import { FAQ_DATA } from '@/data/faq';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 
 export default function DuvidasPage() {
+  const { company } = useSiteData();
   const [search, setSearch] = useState('');
   const [openIds, setOpenIds] = useState<string[]>([FAQ_DATA[0].id, FAQ_DATA[1].id]);
 
@@ -24,7 +25,14 @@ export default function DuvidasPage() {
     );
   });
 
-  const whatsappDoubtUrl = `https://wa.me/${COMPANY_CONFIG.whatsapp}?text=${encodeURIComponent(
+  const cleanPhone = company.whatsapp.replace(/\D/g, '');
+  const phoneWithCountry = cleanPhone.startsWith('55')
+    ? cleanPhone
+    : cleanPhone.length === 10 || cleanPhone.length === 11
+    ? `55${cleanPhone}`
+    : cleanPhone;
+
+  const whatsappDoubtUrl = `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(
     'Olá! Tenho uma dúvida sobre os serviços de buffet da SD Eventos que gostaria de esclarecer.'
   )}`;
 

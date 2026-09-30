@@ -3,10 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, MessageCircle } from 'lucide-react';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 
 export function CtaBanner() {
-  const whatsappUrl = `https://wa.me/${COMPANY_CONFIG.whatsapp}?text=${encodeURIComponent(
+  const { company } = useSiteData();
+  const whatsappUrl = `https://wa.me/${company.whatsapp}?text=${encodeURIComponent(
     'Olá! Gostaria de conversar com a equipe da SD Eventos sobre buffet a domicílio para meu evento.'
   )}`;
 

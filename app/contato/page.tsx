@@ -7,9 +7,10 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { InstagramIcon } from '@/components/ui/InstagramIcon';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 
 export default function ContatoPage() {
+  const { company } = useSiteData();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
@@ -21,7 +22,13 @@ export default function ContatoPage() {
     const formatted = `Olá, SD Eventos! Meu nome é ${name} (${phone}).\n\nMensagem: ${
       message || 'Gostaria de conversar sobre buffet a domicílio para meu evento.'
     }`;
-    const url = `https://wa.me/${COMPANY_CONFIG.whatsapp}?text=${encodeURIComponent(formatted)}`;
+    const cleanPhone = company.whatsapp.replace(/\D/g, '');
+    const phoneWithCountry = cleanPhone.startsWith('55')
+      ? cleanPhone
+      : cleanPhone.length === 10 || cleanPhone.length === 11
+      ? `55${cleanPhone}`
+      : cleanPhone;
+    const url = `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(formatted)}`;
 
     if (typeof window !== 'undefined') {
       window.open(url, '_blank');
@@ -62,12 +69,12 @@ export default function ContatoPage() {
                   WhatsApp Oficial
                 </p>
                 <a
-                  href={`https://wa.me/${COMPANY_CONFIG.whatsapp}`}
+                  href={`https://wa.me/${company.whatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-serif text-xl sm:text-2xl text-white hover:text-[#E0631B] transition-colors block"
                 >
-                  {COMPANY_CONFIG.whatsappFormatted}
+                  {company.whatsappFormatted}
                 </a>
                 <p className="text-[11px] text-[#FAF8F5]/60 mt-0.5">
                   Atendimento direto com a equipe
@@ -79,13 +86,13 @@ export default function ContatoPage() {
                   Instagram Oficial
                 </p>
                 <a
-                  href={COMPANY_CONFIG.instagramUrl}
+                  href={company.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-white hover:text-[#E0631B] transition-colors flex items-center gap-2"
                 >
                   <InstagramIcon className="w-4 h-4 text-[#C8521A]" />
-                  <span>{COMPANY_CONFIG.instagram}</span>
+                  <span>{company.instagram}</span>
                 </a>
               </div>
 
@@ -94,7 +101,7 @@ export default function ContatoPage() {
                   Região Atendida
                 </p>
                 <p className="text-white">
-                  {COMPANY_CONFIG.serviceArea}
+                  {company.serviceArea}
                 </p>
               </div>
 
@@ -103,7 +110,7 @@ export default function ContatoPage() {
                   Horário de Atendimento
                 </p>
                 <p className="text-white">
-                  {COMPANY_CONFIG.hours}
+                  {company.hours}
                 </p>
               </div>
             </div>

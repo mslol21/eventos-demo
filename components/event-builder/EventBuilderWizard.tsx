@@ -13,8 +13,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { SERVICES_DATA } from '@/data/services';
-import { ADDONS_DATA } from '@/data/addons';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 import { calculateEstimatedPrice, formatBRL } from '@/lib/pricing';
 import { buildWhatsAppUrl, generateWhatsAppMessage } from '@/lib/whatsapp';
 import { saveLocalQuote } from '@/lib/storage';
@@ -48,6 +47,7 @@ const MIN_EVENT_DATE = new Date(Date.now() + 86400000).toISOString().split('T')[
 function WizardInner() {
   const searchParams = useSearchParams();
   const initialService = searchParams.get('service') || searchParams.get('servico');
+  const { services, addons, company } = useSiteData();
 
   // Step state
   const [currentStep, setCurrentStep] = useState(1);
@@ -80,18 +80,18 @@ function WizardInner() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Pricing calculation
+  // Pricing calculation using live storage services and addons
   const pricing = useMemo(() => {
-    return calculateEstimatedPrice(serviceId, guestCount, selectedAddonIds);
-  }, [serviceId, guestCount, selectedAddonIds]);
+    return calculateEstimatedPrice(serviceId, guestCount, selectedAddonIds, services, addons);
+  }, [serviceId, guestCount, selectedAddonIds, services, addons]);
 
   const selectedService = useMemo(() => {
-    return SERVICES_DATA.find((s) => s.id === serviceId) || SERVICES_DATA[0];
-  }, [serviceId]);
+    return services.find((s) => s.id === serviceId) || services[0] || SERVICES_DATA[0];
+  }, [services, serviceId]);
 
   const selectedAddonsFull = useMemo(() => {
-    return ADDONS_DATA.filter((a) => selectedAddonIds.includes(a.id));
-  }, [selectedAddonIds]);
+    return addons.filter((a) => selectedAddonIds.includes(a.id));
+  }, [addons, selectedAddonIds]);
 
   // Validation per step
   const validateCurrentStep = (): boolean => {
@@ -131,9 +131,13 @@ function WizardInner() {
         setErrorMsg('Por favor, digite seu nome.');
         return false;
       }
-      const cleanPhone = phone.replace(/\D/g, '');
-      if (cleanPhone.length < 10) {
-        setErrorMsg('Por favor, informe seu WhatsApp com DDD (mínimo 10 dígitos).');
+      const rawDigits = phone.replace(/\D/g, '');
+      let normalizedDigits = rawDigits;
+      if (normalizedDigits.startsWith('55') && (normalizedDigits.length === 12 || normalizedDigits.length === 13)) {
+        normalizedDigits = normalizedDigits.slice(2);
+      }
+      if (!normalizedDigits || normalizedDigits.length < 10 || normalizedDigits.length > 11) {
+        setErrorMsg('Por favor, informe seu WhatsApp com DDD (ex: 11 98406-6393).');
         return false;
       }
     }
@@ -167,7 +171,14 @@ function WizardInner() {
       eventTime,
       guestCount,
       serviceName: selectedService.name,
-      addonsList: selectedAddonsFull.map((a) => `${a.name} (Sob consulta)`),
+      addonsList: selectedAddonsFull.map((a) => {
+        const tag = a.pricePerPerson
+          ? `${formatBRL(a.pricePerPerson)}/pessoa`
+          : a.fixedPrice
+          ? formatBRL(a.fixedPrice)
+          : '';
+        return `${a.name}${tag ? ` (${tag})` : ''}`;
+      }),
       city,
       neighborhood: `${neighborhood} (${spaceType})`,
       notes,
@@ -214,9 +225,19 @@ function WizardInner() {
     };
 
     saveLocalQuote(generatedQuote);
+
+    // Also notify server backend asynchronously
+    fetch('/api/quotes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(generatedQuote),
+    }).catch(() => {
+      // Local storage already persisted the quote
+    });
+
     setIsSubmitting(false);
 
-    const url = buildWhatsAppUrl(currentWhatsAppMessage, COMPANY_CONFIG.whatsapp);
+    const url = buildWhatsAppUrl(currentWhatsAppMessage, company.whatsapp);
     if (typeof window !== 'undefined') {
       window.open(url, '_blank');
     }
@@ -327,7 +348,7 @@ function WizardInner() {
           </div>
 
           <div className="space-y-3 pt-2">
-            {SERVICES_DATA.map((srv) => {
+            {services.filter((s) => s.active !== false).map((srv) => {
               const isSelected = serviceId === srv.id;
               return (
                 <div
@@ -363,7 +384,7 @@ function WizardInner() {
                       </p>
                       {srv.basePriceCash && (
                         <p className="text-xs font-semibold text-[#C8521A] mt-1.5 font-mono">
-                          Promoção até 50 pessoas: 10x de R$ {srv.basePriceInstallments} ou R$ {srv.basePriceCash.toLocaleString('pt-BR')} à vista
+                          {srv.priceNote || 'Promoção até 50 pessoas'}: {srv.installmentCount || 10}x de R$ {srv.basePriceInstallments} ou R$ {srv.basePriceCash.toLocaleString('pt-BR')} à vista
                         </p>
                       )}
                     </div>
@@ -593,8 +614,14 @@ function WizardInner() {
           </div>
 
           <div className="space-y-3 pt-2">
-            {ADDONS_DATA.map((addon) => {
+            {addons.map((addon) => {
               const isChecked = selectedAddonIds.includes(addon.id);
+              const priceTag = addon.pricePerPerson
+                ? `${formatBRL(addon.pricePerPerson)}/pessoa`
+                : addon.fixedPrice
+                ? formatBRL(addon.fixedPrice)
+                : 'Sob consulta';
+
               return (
                 <div
                   key={addon.id}
@@ -623,7 +650,7 @@ function WizardInner() {
                     </div>
                   </div>
                   <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8B7355] shrink-0 ml-2">
-                    Sob consulta
+                    {priceTag}
                   </span>
                 </div>
               );

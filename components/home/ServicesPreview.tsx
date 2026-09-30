@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Check } from 'lucide-react';
+import { useSiteData } from '@/lib/useSiteData';
 
 interface EditorialServiceItem {
   number: string;
@@ -16,6 +17,7 @@ interface EditorialServiceItem {
   installments: string;
   cashPrice: string;
   included: string[];
+  active?: boolean;
 }
 
 const EDITORIAL_SERVICES: EditorialServiceItem[] = [
@@ -76,6 +78,31 @@ const EDITORIAL_SERVICES: EditorialServiceItem[] = [
 ];
 
 export function ServicesPreview() {
+  const { services } = useSiteData();
+
+  const renderedServices = useMemo(() => {
+    return EDITORIAL_SERVICES.map((editorial) => {
+      const match = services.find((s) => s.id === editorial.id);
+      if (!match) return editorial;
+      return {
+        ...editorial,
+        name: match.name || editorial.name,
+        priceNote: match.priceNote || editorial.priceNote,
+        installments: match.basePriceInstallments
+          ? `${match.installmentCount || 10}x de R$ ${match.basePriceInstallments}`
+          : editorial.installments,
+        cashPrice: match.basePriceCash
+          ? `R$ ${match.basePriceCash.toLocaleString('pt-BR')} à vista`
+          : editorial.cashPrice,
+        included:
+          match.includedItems && match.includedItems.length > 0
+            ? match.includedItems
+            : editorial.included,
+        active: match.active !== false,
+      };
+    }).filter((s) => s.active !== false);
+  }, [services]);
+
   return (
     <section className="bg-[#FAF7F2] py-24 sm:py-36 text-[#121815] border-t border-[#E5DFD5]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
@@ -94,7 +121,7 @@ export function ServicesPreview() {
 
         {/* Editorial Alternating Rhythm (55-65% Image vs Editorial Details) */}
         <div className="space-y-28 sm:space-y-40">
-          {EDITORIAL_SERVICES.map((item, idx) => {
+          {renderedServices.map((item, idx) => {
             const isReversed = idx % 2 === 1;
 
             return (

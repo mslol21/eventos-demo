@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, ArrowRight, MessageCircle } from 'lucide-react';
-import { COMPANY_CONFIG } from '@/data/company';
+import { useSiteData } from '@/lib/useSiteData';
 
 const NAV_LINKS = [
   { href: '/', label: 'Início' },
@@ -17,6 +17,7 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
+  const { company } = useSiteData();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -142,13 +143,13 @@ export function Navbar() {
 
           <div className="pt-2">
             <a
-              href={`https://wa.me/${COMPANY_CONFIG.whatsapp}`}
+              href={`https://wa.me/${company.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-2 py-3 rounded-full border border-white/20 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/5"
             >
               <MessageCircle className="w-4 h-4 text-emerald-400" />
-              <span>WhatsApp: {COMPANY_CONFIG.whatsappFormatted}</span>
+              <span>WhatsApp: {company.whatsappFormatted}</span>
             </a>
           </div>
         </div>

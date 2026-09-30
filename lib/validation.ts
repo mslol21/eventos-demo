@@ -26,8 +26,12 @@ export function validateQuoteForm(data: {
     errors.customerName = 'Por favor, informe seu nome completo.';
   }
 
-  const cleanPhone = (data.phone || '').replace(/\D/g, '');
-  if (!cleanPhone || cleanPhone.length < 10 || cleanPhone.length > 11) {
+  const rawDigits = (data.phone || '').replace(/\D/g, '');
+  let normalizedDigits = rawDigits;
+  if (normalizedDigits.startsWith('55') && (normalizedDigits.length === 12 || normalizedDigits.length === 13)) {
+    normalizedDigits = normalizedDigits.slice(2);
+  }
+  if (!normalizedDigits || normalizedDigits.length < 10 || normalizedDigits.length > 11) {
     errors.phone = 'Informe um número de WhatsApp válido com DDD (ex: 11 98406-6393).';
   }
 
